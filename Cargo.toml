@@ -10,5 +10,5 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.8.0", features = ["dynamic"] }
 serialport = "4.2.0"
+druid = { git = "https://github.com/linebender/druid.git" }
