@@ -1,3 +1,8 @@
+mod app_state;
+mod connection_status;
+
+use app_state::AppState;
+
 // mod comms;
 
 // fn main() {
@@ -12,18 +17,8 @@
 
 // }
 
-use std::string;
-
-use druid::widget::{Align, Button, Flex, Label, Padding, TextBox};
-use druid::{
-    AppLauncher, Data, Env, EventCtx, Lens, LocalizedString, PlatformError, Widget, WidgetExt,
-    WindowDesc,
-};
-
-#[derive(Clone, Data, Lens)]
-struct AppState {
-    counter: u32,
-}
+use druid::widget::{Button, Flex, Label, Padding};
+use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WidgetExt, WindowDesc};
 
 fn main() -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder());
@@ -34,12 +29,9 @@ fn main() -> Result<(), PlatformError> {
 }
 
 fn ui_builder() -> impl Widget<AppState> {
-    
-    let button = Button::new("Increment").on_click(|_ctx, data: &mut AppState, _env| {
-        data.counter += 1;
-    });
+    let button = Button::new("Increment").on_click(count_up);
 
-    let label = Label::new(|data: &u32, _env: &_| format!("Counter says: {}", data))
+    let label = Label::new(|data: &u32, _env: &Env| format!("Counter says: {}", data))
         .lens(AppState::counter);
 
     let template = Padding::new(
@@ -53,4 +45,8 @@ fn ui_builder() -> impl Widget<AppState> {
     );
 
     template
+}
+
+fn count_up(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
+    data.counter += 1;
 }
