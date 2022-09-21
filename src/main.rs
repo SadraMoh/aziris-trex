@@ -12,52 +12,45 @@
 
 // }
 
-use druid::text::Formatter;
+use std::string;
+
 use druid::widget::{Align, Button, Flex, Label, Padding, TextBox};
-use druid::{AppLauncher, LocalizedString, PlatformError, Widget, WidgetExt, WindowDesc, Env, EventCtx};
+use druid::{
+    AppLauncher, Data, Env, EventCtx, Lens, LocalizedString, PlatformError, Widget, WidgetExt,
+    WindowDesc,
+};
+
+#[derive(Clone, Data, Lens)]
+struct AppState {
+    counter: u32,
+}
 
 fn main() -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder());
-    let data = 0_u32;
+
+    let data = AppState { counter: 0_u32 };
+
     AppLauncher::with_window(main_window).launch(data)
 }
 
-fn ui_builder() -> impl Widget<u32> {
-    // // The label text will be computed dynamically based on the current locale and count
-    // let text =
-    //     LocalizedString::new("hello-counter").with_arg("count", |data: &u32, _env| (*data).into());
-    // let label = Label::new(text).padding(5.0).center();
-    // let button = Button::new("increment")
-    //     .on_click(|_ctx, data, _env| *data += 1)
-    //     .padding(5.0);
+fn ui_builder() -> impl Widget<AppState> {
+    
+    let button = Button::new("Increment").on_click(|_ctx, data: &mut AppState, _env| {
+        data.counter += 1;
+    });
 
-    // Flex::column().with_child(label).with_child(button)
+    let label = Label::new(|data: &u32, _env: &_| format!("Counter says: {}", data))
+        .lens(AppState::counter);
 
-    let text =
-        LocalizedString::new("hello-counter").with_arg("count", |data: &u32, _env| (*data).into());
+    let template = Padding::new(
+        10.,
+        Flex::row().with_flex_child(
+            Flex::column()
+                .with_flex_child(button, 1.)
+                .with_flex_child(label, 1.),
+            1.,
+        ),
+    );
 
-    Padding::new(
-        10.0,
-        Flex::row()
-            .with_flex_child(
-                Flex::column()
-                    .with_flex_child(Label::new(text), 1.0)
-                    .with_flex_child(Align::centered(Label::new("bottom left")), 1.0)
-                    .with_flex_child(
-                        Button::new("increment")
-                            .on_click(|_ctx, data, _env| {
-                                *data += 1;
-                            })
-                            .padding(5.0),
-                        1.0,
-                    ),
-                1.0,
-            )
-            .with_flex_child(
-                Flex::column()
-                    .with_flex_child(Label::new("top right"), 1.0)
-                    .with_flex_child(Align::centered(Label::new("bottom right")), 1.0),
-                1.0,
-            ),
-    )
+    template
 }

@@ -2,6 +2,7 @@ use serialport::*;
 use std::time::Duration;
 
 const CHANNEL_TIMEOUT: u64 = 1000;
+const CHANNEL_BAUDRATE: u64 = 9600;
 
 pub struct Channel {
     pub serial: Box<dyn SerialPort>,
@@ -16,7 +17,7 @@ impl Channel {
             kind: ErrorKind::NoDevice,
         })?;
 
-        let builder = serialport::new(port.port_name.clone(), 9600)
+        let builder = serialport::new(port.port_name.clone(), CHANNEL_BAUDRATE)
             .timeout(Duration::from_millis(CHANNEL_TIMEOUT))
             // .data_bits(DataBits::Eight)
             // .stop_bits(StopBits::One)
