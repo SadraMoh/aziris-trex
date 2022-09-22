@@ -17,15 +17,19 @@ use app_state::AppState;
 
 // }
 
-use druid::widget::{Button, Flex, Label, Padding};
-use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WidgetExt, WindowDesc};
+use druid::widget::{Align, Button, Flex, Label, Padding, FlexParams, CrossAxisAlignment};
+use druid::{
+    AppLauncher, Color, Env, EventCtx, PlatformError, UnitPoint, Widget, WidgetExt, WindowDesc,
+};
 
 fn main() -> Result<(), PlatformError> {
-    let main_window = WindowDesc::new(ui_builder());
+    let main_window = WindowDesc::new(ui_builder()).window_size((900., 600.));
 
     let data = AppState { counter: 0_u32 };
 
-    AppLauncher::with_window(main_window).launch(data)
+    Ok(AppLauncher::with_window(main_window)
+        .launch(data)
+        .expect("Failed to launch application"))
 }
 
 fn ui_builder() -> impl Widget<AppState> {
@@ -36,12 +40,24 @@ fn ui_builder() -> impl Widget<AppState> {
 
     let template = Padding::new(
         10.,
-        Flex::row().with_flex_child(
-            Flex::column()
-                .with_flex_child(button, 1.)
-                .with_flex_child(label, 1.),
-            1.,
-        ),
+        Flex::row()
+            .with_flex_child(
+                Flex::column()
+                    .with_child(Label::new("Hello").center())
+                    .with_child(Label::new("Hello").align_left())
+                    .with_child(Label::new("Hello").align_right())
+                    .border(Color::RED, 1.),
+                    FlexParams::new(1., CrossAxisAlignment::Start),
+            )
+            .with_flex_child(
+                Flex::column()
+                    .with_child(Label::new("Hello").center())
+                    .with_child(Label::new("Hello").align_left())
+                    .with_child(Label::new("Hello").align_right())
+                    .border(Color::RED, 1.),
+                    FlexParams::new(1., CrossAxisAlignment::End),
+            )
+            .border(Color::BLUE, 1.),
     );
 
     template
