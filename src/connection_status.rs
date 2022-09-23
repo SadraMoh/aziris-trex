@@ -1,14 +1,11 @@
+use crate::app_state::AppState;
+
 use druid::{
     widget::{Flex, Label},
-    Color, Data, Env, Lens, Widget, WidgetExt,
+    Color, Env, Widget, WidgetExt,
 };
 
-#[derive(Clone, Data, Lens)]
-pub struct ConnectionStatus {
-    is_connected: bool,
-}
-
-fn build_connection_status() -> impl Widget<ConnectionStatus> {
+pub fn build_connection_status() -> impl Widget<AppState> {
     let template = Flex::row()
         .with_flex_child(
             Label::new(|data: &bool, _env: &Env| {
@@ -18,7 +15,7 @@ fn build_connection_status() -> impl Widget<ConnectionStatus> {
                     "Disconnected"
                 }
             })
-            .lens(ConnectionStatus::is_connected)
+            .lens(AppState::is_connected)
             .background(Color::RED),
             1.,
         )
