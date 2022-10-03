@@ -2,7 +2,7 @@ use serialport::*;
 use std::time::Duration;
 
 const CHANNEL_TIMEOUT: u64 = 1000;
-const CHANNEL_BAUDRATE: u64 = 9600;
+const CHANNEL_BAUDRATE: u32 = 9600;
 
 pub struct Channel {
     pub serial: Box<dyn SerialPort>,
