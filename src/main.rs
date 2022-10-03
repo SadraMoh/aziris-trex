@@ -48,6 +48,9 @@ fn main() -> Result<(), PlatformError> {
 fn ui_builder() -> impl Widget<AppState> {
     let button = Button::new("Increment").on_click(count_up);
 
+    let source = vec![("Hello", ScanMode::Auto), ("World", ScanMode::Panel)];
+    let radios = druid::widget::RadioGroup::column(source).lens(AppState::scan_mode);
+
     let template = Padding::new(
         12.,
         Flex::row()
@@ -73,6 +76,7 @@ fn ui_builder() -> impl Widget<AppState> {
             .with_flex_child(build_logs(), FlexParams::new(1., CrossAxisAlignment::End))
             // test button
             .with_child(button)
+            .with_child(radios)
             .border(Color::BLUE, 1.),
     );
 
