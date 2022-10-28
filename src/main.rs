@@ -1,5 +1,7 @@
+mod actions;
 mod app_state;
 mod connection_status;
+mod controls;
 mod logs;
 mod options;
 mod vars;
@@ -22,6 +24,8 @@ use crate::app_state::AppState;
 
 // }
 
+use actions::build_actions;
+use controls::build_controls;
 use druid::widget::{Button, CrossAxisAlignment, Flex, FlexParams, Label, Padding, Scroll};
 use druid::{AppLauncher, Color, Env, EventCtx, PlatformError, Widget, WidgetExt, WindowDesc};
 use logs::build_logs;
@@ -68,6 +72,14 @@ fn ui_builder() -> impl Widget<AppState> {
                     )
                     .with_flex_child(
                         build_options(),
+                        FlexParams::new(1., CrossAxisAlignment::End),
+                    )
+                    .with_flex_child(
+                        build_actions(),
+                        FlexParams::new(1., CrossAxisAlignment::End),
+                    )
+                    .with_flex_child(
+                        build_controls(),
                         FlexParams::new(1., CrossAxisAlignment::End),
                     )
                     .border(Color::RED, 1.),
