@@ -1,5 +1,5 @@
-use druid::widget::{Button, CrossAxisAlignment, Flex, FlexParams, Label, Padding};
-use druid::{AppLauncher, Color, Env, EventCtx, PlatformError, Widget, WidgetExt, WindowDesc};
+use druid::widget::{CrossAxisAlignment, Flex, FlexParams, Padding};
+use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WindowDesc};
 use trex_ui::actions::build_actions;
 use trex_ui::connection_status::build_connection_status;
 use trex_ui::controls::build_controls;
@@ -9,7 +9,10 @@ use trex_ui::vars::{SIZE_L, SIZE_XXL};
 use trex_ui::AppState;
 
 fn main() -> Result<(), PlatformError> {
-    let main_window = WindowDesc::new(ui_builder).window_size((900., 600.));
+    let main_window = WindowDesc::new(ui_builder)
+        .title("T-Rex Control Panel")
+        .window_size((900., 540.))
+        .with_min_size((640., 540.));
 
     let data = AppState {
         counter: 0_u32,
@@ -25,11 +28,6 @@ fn main() -> Result<(), PlatformError> {
 }
 
 fn ui_builder() -> impl Widget<AppState> {
-    let button = Button::new("Increment").on_click(count_up);
-
-    let source = vec![("Hello", ScanMode::Auto), ("World", ScanMode::Panel)];
-    let radios = druid::widget::RadioGroup::new(source).lens(AppState::scan_mode);
-
     let template = Padding::new(
         12.,
         Flex::row()
@@ -38,26 +36,20 @@ fn ui_builder() -> impl Widget<AppState> {
                 Flex::column()
                     .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
                     .must_fill_main_axis(true)
-                    .with_child(Label::new("Hello").center())
-                    .with_child(Label::new("Hello").align_left())
-                    .with_child(Label::new("Hello").align_right())
                     .with_child(build_connection_status())
-                    .with_spacer(SIZE_L)
+                    .with_spacer(SIZE_XXL)
                     .with_child(build_options())
                     .with_spacer(SIZE_L)
                     .with_child(build_actions())
                     .with_spacer(SIZE_L)
-                    .with_child(build_controls())
-                    .border(Color::RED, 1.),
-                1.
+                    .with_child(build_controls()), // test button
+                // .with_child(button)
+                // .with_child(radios)
+                1.,
             )
             .with_spacer(SIZE_XXL)
             // right
-            .with_flex_child(build_logs(), FlexParams::new(1., CrossAxisAlignment::End))
-            // test button
-            .with_child(button)
-            .with_child(radios)
-            .border(Color::BLUE, 1.),
+            .with_flex_child(build_logs(), FlexParams::new(1., CrossAxisAlignment::End)),
     );
 
     template

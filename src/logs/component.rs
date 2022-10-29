@@ -1,4 +1,4 @@
-use druid::{Widget, widget::{TextBox, Flex, Label}, Color, WidgetExt};
+use druid::{Widget, widget::{TextBox, Flex, Label}, WidgetExt};
 
 use crate::{AppState, vars::{TEXTBOX_BACKGROUND, BORDER_RADIUS, SIZE_S}};
 
@@ -23,8 +23,7 @@ pub fn build_logs() -> impl Widget<AppState> {
   let template = Flex::column()
       .with_child(Label::new("Logs").align_left())
       .with_spacer(SIZE_S)
-      .with_flex_child(viewer, 1.)
-      .border(Color::GREEN, 1.);
+      .with_flex_child(viewer, 1.);
 
   template
 }

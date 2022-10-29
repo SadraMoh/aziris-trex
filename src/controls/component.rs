@@ -5,7 +5,7 @@ use druid::{
 
 use crate::{
     atomic::group,
-    vars::{SIZE_M, SIZE_S, SIZE_L},
+    vars::{SIZE_S, SIZE_XL},
     AppState,
 };
 
@@ -32,7 +32,7 @@ pub fn build_controls() -> impl Widget<AppState> {
                     .with_flex_child(Button::new("←→").on_click(expand).expand(), 1.),
                 1.,
             )
-            .with_spacer(SIZE_L)
+            .with_spacer(SIZE_XL)
             .with_flex_child(
                 Flex::row()
                     .with_flex_child(

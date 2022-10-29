@@ -1,7 +1,7 @@
 use druid::Color;
 
 pub const TEXTBOX_BACKGROUND: Color = Color::rgb8(28, 28, 28);
-pub const BORDER_RADIUS: f64 = 8.0;
+pub const BORDER_RADIUS: f64 = 6.0;
 
 pub const SIZE_S: f64 = 8.;
 pub const SIZE_M: f64 = 12.;

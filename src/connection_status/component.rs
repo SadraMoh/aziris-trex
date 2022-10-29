@@ -1,4 +1,4 @@
-use crate::AppState;
+use crate::{AppState, vars::SIZE_M};
 
 use druid::{
     widget::{Either, Flex, Label},
@@ -21,6 +21,7 @@ pub fn build_connection_status() -> impl Widget<AppState> {
 
     let template = Flex::row()
         .with_flex_child(either_dot, 1.) // dot
+        .with_spacer(SIZE_M)
         .with_flex_child(
             Label::new(|is_connected: &bool, _env: &Env| {
                 if *is_connected {

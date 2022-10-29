@@ -1,5 +1,3 @@
-use std::fmt::Alignment;
-
 use druid::{
     widget::{CrossAxisAlignment, Flex, Label, RadioGroup},
     Widget, WidgetExt,
