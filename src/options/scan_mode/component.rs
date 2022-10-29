@@ -1,7 +1,7 @@
 use std::fmt::Alignment;
 
 use druid::{
-    widget::{Flex, Label, RadioGroup},
+    widget::{CrossAxisAlignment, Flex, Label, RadioGroup},
     Widget, WidgetExt,
 };
 
@@ -15,6 +15,8 @@ pub fn build_scan_mode() -> impl Widget<AppState> {
     ];
 
     let radio_group = Flex::column()
+        .cross_axis_alignment(CrossAxisAlignment::Start)
+        .must_fill_main_axis(true)
         .with_child(Label::new("Scan order"))
         .with_spacer(SIZE_S)
         .with_child(RadioGroup::new(SCAN_MODE_OPTIONS.to_vec()).lens(AppState::scan_mode));
