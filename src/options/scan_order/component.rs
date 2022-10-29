@@ -1,14 +1,6 @@
-use druid::{widget::RadioGroup, Data, Widget, WidgetExt};
+use druid::{widget::RadioGroup, Widget, WidgetExt};
 
-use crate::app_state::AppState;
-
-#[derive(Clone, Debug, Data, PartialEq)]
-pub enum ScanOrder {
-    Right,
-    Left,
-    RightThenLeft,
-    LeftThenRight,
-}
+use crate::{options::ScanOrder, AppState};
 
 pub fn build_scan_order() -> impl Widget<AppState> {
     const SCAN_ORDER_OPTIONS: [(&str, ScanOrder); 4] = [
@@ -18,7 +10,7 @@ pub fn build_scan_order() -> impl Widget<AppState> {
         ("LeftThenRight", ScanOrder::LeftThenRight),
     ];
 
-    let radio_group = RadioGroup::column(SCAN_ORDER_OPTIONS.to_vec()).lens(AppState::scan_order);
+    let radio_group = RadioGroup::new(SCAN_ORDER_OPTIONS.to_vec()).lens(AppState::scan_order);
 
     radio_group
 }

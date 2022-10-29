@@ -1,4 +1,4 @@
-use crate::app_state::AppState;
+use crate::AppState;
 
 use druid::{
     widget::{Either, Flex, Label},
@@ -24,9 +24,9 @@ pub fn build_connection_status() -> impl Widget<AppState> {
         .with_flex_child(
             Label::new(|is_connected: &bool, _env: &Env| {
                 if *is_connected {
-                    "Connected To"
+                    "Connected To".into()
                 } else {
-                    "Disconnected"
+                    "Disconnected".into()
                 }
             })
             .lens(AppState::is_connected),
