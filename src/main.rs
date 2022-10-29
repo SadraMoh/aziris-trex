@@ -1,5 +1,6 @@
 use druid::widget::{Button, CrossAxisAlignment, Flex, FlexParams, Label, Padding};
 use druid::{AppLauncher, Color, Env, EventCtx, PlatformError, Widget, WidgetExt, WindowDesc};
+use trex_ui::actions::build_actions;
 use trex_ui::connection_status::build_connection_status;
 use trex_ui::logs::build_logs;
 use trex_ui::options::{build_options, ScanMode, ScanOrder};
@@ -42,6 +43,8 @@ fn ui_builder() -> impl Widget<AppState> {
                     .with_child(build_connection_status())
                     .with_spacer(SIZE_L)
                     .with_child(build_options())
+                    .with_spacer(SIZE_L)
+                    .with_child(build_actions())
                     .border(Color::RED, 1.),
                 1.
             )
