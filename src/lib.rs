@@ -5,5 +5,6 @@ pub mod controls;
 pub mod global;
 pub mod logs;
 pub mod options;
+pub mod atomic;
 
 pub use {global::vars, global::AppState};

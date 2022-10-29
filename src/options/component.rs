@@ -1,25 +1,22 @@
-use druid::{
-    widget::{Flex, Label, Padding, RadioGroup},
-    Widget, WidgetExt,
+use druid::{widget::Flex, Widget, WidgetExt};
+
+use crate::{
+    atomic::group,
+    options::{build_scan_mode, build_scan_order},
+    vars::SIZE_M,
+    AppState,
 };
 
-use crate::{options::ScanOrder, vars::SIZE_M, AppState};
-
 pub fn build_options() -> impl Widget<AppState> {
-    const SCAN_ORDER_OPTIONS: [(&str, ScanOrder); 4] = [
-        ("Left", ScanOrder::Left),
-        ("Right", ScanOrder::Right),
-        ("RightThenLeft", ScanOrder::RightThenLeft),
-        ("LeftThenRight", ScanOrder::LeftThenRight),
-    ];
-
-    let radio_group = RadioGroup::new(SCAN_ORDER_OPTIONS.to_vec()).lens(AppState::scan_order);
-
-    let template = Padding::new(
-        SIZE_M,
-        Flex::column()
-            .with_flex_child(Label::new("Scan orer"), 1.)
-            .with_child(radio_group),
+    let template = group(
+        "Options",
+        Flex::row()
+            .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
+            .must_fill_main_axis(true)
+            .main_axis_alignment(druid::widget::MainAxisAlignment::SpaceBetween)
+            .with_flex_child(build_scan_order().expand_width().align_left(), 1.)
+            .with_spacer(SIZE_M)
+            .with_flex_child(build_scan_mode().expand_width().align_left(), 1.),
     );
 
     template

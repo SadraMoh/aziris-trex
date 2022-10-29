@@ -3,7 +3,7 @@ use druid::{AppLauncher, Color, Env, EventCtx, PlatformError, Widget, WidgetExt,
 use trex_ui::connection_status::build_connection_status;
 use trex_ui::logs::build_logs;
 use trex_ui::options::{build_options, ScanMode, ScanOrder};
-use trex_ui::vars::SIZE_XXL;
+use trex_ui::vars::{SIZE_L, SIZE_XXL};
 use trex_ui::AppState;
 
 fn main() -> Result<(), PlatformError> {
@@ -34,19 +34,16 @@ fn ui_builder() -> impl Widget<AppState> {
             // left
             .with_flex_child(
                 Flex::column()
+                    .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
+                    .must_fill_main_axis(true)
                     .with_child(Label::new("Hello").center())
                     .with_child(Label::new("Hello").align_left())
                     .with_child(Label::new("Hello").align_right())
-                    .with_child(build_connection_status().align_left())
-                    // .with_child(
-                    //     Label::new(|data: &AppState, _env: &Env| {
-                    //         format!("Scan Order is: {:#?}", data.scan_order)
-                    //     })
-                    //     .align_right(),
-                    // )
-                    .with_child(build_options().align_left())
+                    .with_child(build_connection_status())
+                    .with_spacer(SIZE_L)
+                    .with_child(build_options())
                     .border(Color::RED, 1.),
-                FlexParams::new(1., CrossAxisAlignment::Start),
+                1.
             )
             .with_spacer(SIZE_XXL)
             // right
