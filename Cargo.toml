@@ -15,3 +15,4 @@ features = ["im", "svg", "image"]
 
 [dependencies]
 serialport = "4.2.0"
+enigo = "0.0.14"

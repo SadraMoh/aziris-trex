@@ -9,14 +9,14 @@ use crate::{
     AppState,
 };
 
-fn retract(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {}
-fn expand(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {}
+fn retract(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
+fn expand(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
 
-fn left(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {}
-fn right(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {}
+fn left(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
+fn right(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
 
-fn up(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {}
-fn down(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {}
+fn up(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
+fn down(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
 
 const BUTTON_SIZE: f64 = 64.;
 

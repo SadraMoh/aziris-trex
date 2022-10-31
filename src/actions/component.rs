@@ -9,8 +9,8 @@ use crate::{
     AppState,
 };
 
-fn auto_adjust(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {}
-fn calibrate(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {}
+fn auto_adjust(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
+fn calibrate(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
 
 pub fn build_actions() -> impl Widget<AppState> {
     let template = group(
