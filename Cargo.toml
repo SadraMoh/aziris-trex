@@ -15,4 +15,5 @@ features = ["im", "svg", "image"]
 
 [dependencies]
 serialport = "4.2.0"
-enigo = "0.0.14"
+# enigo = "0.0.14"
+enigo = {path = "enigo", version = "0.0.14"}

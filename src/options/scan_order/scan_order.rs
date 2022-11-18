@@ -6,4 +6,5 @@ pub enum ScanOrder {
     Left,
     RightThenLeft,
     LeftThenRight,
+    InApp,
 }

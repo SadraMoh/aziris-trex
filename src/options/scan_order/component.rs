@@ -6,11 +6,12 @@ use druid::{
 use crate::{options::ScanOrder, vars::SIZE_S, AppState};
 
 pub fn build_scan_order() -> impl Widget<AppState> {
-    const SCAN_ORDER_OPTIONS: [(&str, ScanOrder); 4] = [
+    const SCAN_ORDER_OPTIONS: [(&str, ScanOrder); 5] = [
         ("Left", ScanOrder::Left),
         ("Right", ScanOrder::Right),
         ("RightThenLeft", ScanOrder::RightThenLeft),
         ("LeftThenRight", ScanOrder::LeftThenRight),
+        ("InApp", ScanOrder::InApp),
     ];
 
     let radio_group = Flex::column()

@@ -1,6 +1,11 @@
-use druid::widget::{CrossAxisAlignment, Flex, FlexParams, Padding, Button};
+#![windows_subsystem = "windows"]
+
+use std::thread;
+use std::time::Duration;
+
+use druid::widget::{Button, CrossAxisAlignment, Flex, FlexParams, Padding};
 use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WindowDesc};
-use enigo::{Enigo, MouseControllable, KeyboardControllable};
+use enigo::{Enigo, KeyboardControllable, MouseControllable};
 use trex_ui::actions::build_actions;
 use trex_ui::connection_status::build_connection_status;
 use trex_ui::controls::build_controls;
@@ -9,11 +14,11 @@ use trex_ui::options::{build_options, ScanMode, ScanOrder};
 use trex_ui::vars::{SIZE_L, SIZE_XXL};
 use trex_ui::AppState;
 
-
 fn main() -> Result<(), PlatformError> {
+    
     let main_window = WindowDesc::new(ui_builder)
         .title("T-Rex Control Panel")
-        .window_size((900., 540.))
+        .window_size((900., 620.))
         .with_min_size((640., 540.));
 
     let data = AppState {
@@ -48,9 +53,7 @@ fn ui_builder() -> impl Widget<AppState> {
                     // test buttons
                     .with_child(Button::new("Test").on_click(count_up))
                     .with_child(Button::new("Hello World").on_click(autogui_hello_world))
-                    .with_child(Button::new("Scan").on_click(send_key))
-                    // .with_child(radios)
-                    ,
+                    .with_child(Button::new("Scan").on_click(send_key)), // .with_child(radios)
                 1.,
             )
             .with_spacer(SIZE_XXL)
@@ -62,39 +65,51 @@ fn ui_builder() -> impl Widget<AppState> {
 }
 
 fn autogui_hello_world(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
-
     let mut enigo = Enigo::new();
     enigo.mouse_move_to(600, 200);
     enigo.mouse_click(enigo::MouseButton::Left);
-    enigo.key_sequence_parse("{+CTRL}a{-CTRL}{+SHIFT}Hello World{-SHIFT}");
-
+    enigo.key_sequence_parse("hello world");
 }
 
+const SCAN_DELAY: u64 = 350;
+const RIGHT_KEY: enigo::Key = enigo::Key::F9;
+const LEFT_KEY: enigo::Key = enigo::Key::F8;
+const INAPP_KEY: enigo::Key = enigo::Key::F10;
 fn send_key(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
-
     let mut enigo = Enigo::new();
 
     enigo.mouse_move_to(600, 200);
+    enigo.mouse_click(enigo::MouseButton::Left);
 
-    let sequence = match data.scan_order {
-        ScanOrder::Right => "{+CTRL}r{-CTRL}",
-        ScanOrder::Left => "{+CTRL}l{-CTRL}",
-        ScanOrder::RightThenLeft => "{+CTRL}rl{-CTRL}",
-        ScanOrder::LeftThenRight => "{+CTRL}lr{-CTRL}",
+    match data.scan_order {
+        ScanOrder::InApp => enigo.key_click(INAPP_KEY),
+        ScanOrder::Right => enigo.key_click(RIGHT_KEY),
+        ScanOrder::Left => enigo.key_click(LEFT_KEY),
+        ScanOrder::RightThenLeft => {
+            thread::spawn(move || {
+                enigo.key_click(RIGHT_KEY);
+                thread::sleep(Duration::from_millis(SCAN_DELAY));
+                enigo.key_click(LEFT_KEY);
+            }).join().unwrap();
+        }
+        ScanOrder::LeftThenRight => {
+            thread::spawn(move || {
+                enigo.key_click(LEFT_KEY);
+                thread::sleep(Duration::from_millis(SCAN_DELAY));
+                enigo.key_click(RIGHT_KEY);
+            }).join().unwrap();
+        }
     };
-
-    enigo.key_sequence_parse(sequence);
-
 }
 
 fn count_up(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
-    
     data.counter += 1;
     data.scan_order = match data.scan_order {
         ScanOrder::Left => ScanOrder::Right,
         ScanOrder::Right => ScanOrder::RightThenLeft,
         ScanOrder::RightThenLeft => ScanOrder::LeftThenRight,
-        ScanOrder::LeftThenRight => ScanOrder::Left,
+        ScanOrder::LeftThenRight => ScanOrder::InApp,
+        ScanOrder::InApp => ScanOrder::Left,
     };
 
     data.is_connected = !data.is_connected;
@@ -103,5 +118,4 @@ fn count_up(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
     c.push_str("Hello ");
 
     data.logs.push_str(&c);
-
 }
