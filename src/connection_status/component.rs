@@ -25,9 +25,9 @@ pub fn build_connection_status() -> impl Widget<AppState> {
         .with_flex_child(
             Label::new(|is_connected: &bool, _env: &Env| {
                 if *is_connected {
-                    "Connected To".into()
+                    "Connected To".to_string()
                 } else {
-                    "Disconnected".into()
+                    "Disconnected".to_string()
                 }
             })
             .lens(AppState::is_connected),

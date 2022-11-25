@@ -2,7 +2,7 @@ use druid::{Data, Lens};
 
 use crate::options::{ScanMode, ScanOrder};
 
-#[derive(Clone, Data, Lens)]
+#[derive(Clone, Data, Lens, Default)]
 pub struct AppState {
     pub counter: u32,
     pub is_connected: bool,
@@ -11,4 +11,6 @@ pub struct AppState {
     pub scan_order: ScanOrder,
 
     pub scan_mode: ScanMode,
+
+    pub light_mix: f64,
 }

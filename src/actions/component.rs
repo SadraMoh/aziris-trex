@@ -1,11 +1,11 @@
 use druid::{
-    widget::{Button, Flex, Label, Padding},
+    widget::{Button, Flex},
     Env, EventCtx, Widget,
 };
 
 use crate::{
     atomic::group,
-    vars::{SIZE_M, SIZE_S},
+    vars::{ SIZE_S},
     AppState,
 };
 

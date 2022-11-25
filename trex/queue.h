@@ -1,13 +1,14 @@
-typedef void (*taskCallback)(struct Task *p);
+#include "HardwareSerial.h"
+typedef void (*TaskCallback)();
 
 struct Task
 {
   unsigned long start;
   unsigned long delay;
-  taskCallback func;
+  TaskCallback func;
 };
 
-const size_t TASK_POOL_SIZE = 16;
+const size_t TASK_POOL_SIZE = 2;
 
 static const struct Task *TaskPool[TASK_POOL_SIZE];
 
@@ -17,14 +18,17 @@ void clear_queue()
   for (size_t i = 0; i < TASK_POOL_SIZE; i++)
   {
 
-    free(TaskPool[i]);
+    free(&TaskPool[i]);
     TaskPool[i] = NULL;
   }
 }
 
-void waitcall(taskCallback func, unsigned long delay)
+void waitcall(TaskCallback func, unsigned long delay)
 {
-  struct Task *task = malloc(sizeof(*task));
+
+  Serial.print("HERE");
+  
+  Task *task = (Task *) malloc(sizeof(Task));
   task->delay = delay;
   task->func = func;
   task->start = millis();
@@ -65,9 +69,9 @@ void doChores()
 
       // Serial.println(F("------------RAN-------------"));
 
-      TaskPool[i]->func(0);
+      TaskPool[i]->func();
 
-      free(TaskPool[i]);
+      free(&TaskPool[i]);
       TaskPool[i] = NULL;
     }
   }

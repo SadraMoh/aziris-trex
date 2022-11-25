@@ -3,35 +3,34 @@
 use std::thread;
 use std::time::Duration;
 
-use druid::widget::{Button, CrossAxisAlignment, Flex, FlexParams, Padding};
+use druid::widget::{CrossAxisAlignment, Flex, FlexParams, Padding};
 use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WindowDesc};
 use enigo::{Enigo, KeyboardControllable, MouseControllable};
 use trex_ui::actions::build_actions;
 use trex_ui::connection_status::build_connection_status;
 use trex_ui::controls::build_controls;
+use trex_ui::lights::build_lights;
 use trex_ui::logs::build_logs;
-use trex_ui::options::{build_options, ScanMode, ScanOrder};
+use trex_ui::options::{build_options, ScanOrder};
 use trex_ui::vars::{SIZE_L, SIZE_XXL};
 use trex_ui::AppState;
 
+
+
 fn main() -> Result<(), PlatformError> {
+
+    println!("INIT");
     
-    let main_window = WindowDesc::new(ui_builder)
+    let main_window = WindowDesc::new(ui_builder())
         .title("T-Rex Control Panel")
-        .window_size((900., 620.))
+        .window_size((900., 900.))
         .with_min_size((640., 540.));
 
-    let data = AppState {
-        counter: 0_u32,
-        is_connected: false,
-        logs: String::new(),
-        scan_mode: ScanMode::Auto,
-        scan_order: ScanOrder::RightThenLeft,
-    };
+    let data = AppState::default();
 
     Ok(AppLauncher::with_window(main_window)
         .launch(data)
-        .expect("Failed to launch application"))
+        .expect("Failed to launch the application"))
 }
 
 fn ui_builder() -> impl Widget<AppState> {
@@ -39,6 +38,7 @@ fn ui_builder() -> impl Widget<AppState> {
         12.,
         Flex::row()
             // left
+            .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
             .with_flex_child(
                 Flex::column()
                     .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
@@ -49,11 +49,14 @@ fn ui_builder() -> impl Widget<AppState> {
                     .with_spacer(SIZE_L)
                     .with_child(build_actions())
                     .with_spacer(SIZE_L)
+                    .with_child(build_lights())
+                    .with_spacer(SIZE_L)
                     .with_child(build_controls())
                     // test buttons
-                    .with_child(Button::new("Test").on_click(count_up))
-                    .with_child(Button::new("Hello World").on_click(autogui_hello_world))
-                    .with_child(Button::new("Scan").on_click(send_key)), // .with_child(radios)
+                    // .with_child(Button::new("Test").on_click(count_up))
+                    // .with_child(Button::new("Hello World").on_click(autogui_hello_world))
+                    // .with_child(Button::new("Scan").on_click(send_key))
+                    , // .with_child(radios)
                 1.,
             )
             .with_spacer(SIZE_XXL)
@@ -63,7 +66,7 @@ fn ui_builder() -> impl Widget<AppState> {
 
     template
 }
-
+    
 fn autogui_hello_world(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
     let mut enigo = Enigo::new();
     enigo.mouse_move_to(600, 200);

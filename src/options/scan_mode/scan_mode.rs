@@ -6,3 +6,9 @@ pub enum ScanMode {
     Panel,
     Auto,
 }
+
+impl Default for ScanMode {
+    fn default() -> Self {
+        ScanMode::Pedal
+    }
+}

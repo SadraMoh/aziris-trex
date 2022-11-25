@@ -8,3 +8,4 @@ pub const SIZE_M: f64 = 12.;
 pub const SIZE_L: f64 = 16.;
 pub const SIZE_XL: f64 = 20.;
 pub const SIZE_XXL: f64 = 24.;
+

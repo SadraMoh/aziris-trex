@@ -17,7 +17,7 @@ pub fn build_scan_mode() -> impl Widget<AppState> {
         .must_fill_main_axis(true)
         .with_child(Label::new("Scan order"))
         .with_spacer(SIZE_S)
-        .with_child(RadioGroup::new(SCAN_MODE_OPTIONS.to_vec()).lens(AppState::scan_mode));
+        .with_child(RadioGroup::column(SCAN_MODE_OPTIONS.to_vec()).lens(AppState::scan_mode));
 
     radio_group
 }

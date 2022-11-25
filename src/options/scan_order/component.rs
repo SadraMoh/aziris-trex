@@ -19,7 +19,7 @@ pub fn build_scan_order() -> impl Widget<AppState> {
         .must_fill_main_axis(true)
         .with_child(Label::new("Scan order"))
         .with_spacer(SIZE_S)
-        .with_child(RadioGroup::new(SCAN_ORDER_OPTIONS.to_vec()).lens(AppState::scan_order));
+        .with_child(RadioGroup::column(SCAN_ORDER_OPTIONS.to_vec()).lens(AppState::scan_order));
 
     radio_group
 }

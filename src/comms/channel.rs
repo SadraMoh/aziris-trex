@@ -1,7 +1,13 @@
+use once_cell::sync::{Lazy};
 use serialport::*;
-use std::time::Duration;
+use std::{time::Duration, sync::Mutex};
 
-const CHANNEL_TIMEOUT: u64 = 1000;
+pub static COMMS: Lazy<Mutex<Channel>> = Lazy::new(|| {
+    let m = Channel::init().unwrap();
+    Mutex::new(m)
+});
+
+const CHANNEL_TIMEOUT: u64 = 16;
 const CHANNEL_BAUDRATE: u32 = 9600;
 
 pub struct Channel {
@@ -9,6 +15,7 @@ pub struct Channel {
 }
 
 impl Channel {
+
     pub fn init() -> Result<Self> {
         let ports = available_ports()?;
 
@@ -19,8 +26,8 @@ impl Channel {
 
         let builder = serialport::new(port.port_name.clone(), CHANNEL_BAUDRATE)
             .timeout(Duration::from_millis(CHANNEL_TIMEOUT))
-            // .data_bits(DataBits::Eight)
-            // .stop_bits(StopBits::One)
+            .data_bits(DataBits::Eight)
+            .stop_bits(StopBits::One)
             ;
 
         let serial = builder.open()?;
@@ -35,15 +42,23 @@ impl Channel {
         Ok(size)
     }
 
-    // pub fn read_str(&mut self) -> Result<String> {
-    //     let mut read_buf = [0; 32];
-    //     let size = self.serial.read(&mut read_buf)?;
-    //     self.serial.flush()?;
+    pub fn read(&mut self) -> Result<[u8; 32]> {
+        let mut read_buf = [0; 32];
+        let _size = self.serial.read(&mut read_buf)?;
+        self.serial.flush()?;
 
-    //     if let Ok(text) = std::str::from_utf8(&read_buf[..size]) {
-    //         Ok(String::from(text))
-    //     } else {
-    //         Ok(String::from("!"))
-    //     }
-    // }
+        Ok(read_buf)
+    }
+    
+    pub fn read_str(&mut self) -> Result<String> {
+        let mut read_buf = [0; 32];
+        let size = self.serial.read(&mut read_buf)?;
+        self.serial.flush()?;
+
+        if let Ok(text) = std::str::from_utf8(&read_buf[..size]) {
+            Ok(String::from(text))
+        } else {
+            Ok(String::from("!"))
+        }
+    }
 }
