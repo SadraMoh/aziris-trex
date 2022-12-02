@@ -3,7 +3,7 @@ use druid::{
     Color, Env, KeyOrValue, Widget, WidgetExt, UpdateCtx,
 };
 
-use crate::{atomic::group, vars::SIZE_S, AppState, comms::COMMS};
+use crate::{atomic::group, vars::SIZE_S, AppState, comms::{COMMS, commands}};
 
 struct ValueChanged<T> {
     update_fn: Box<dyn Fn(&mut UpdateCtx, &T, &T, &Env)>,
@@ -64,18 +64,18 @@ pub fn build_lights() -> impl Widget<AppState> {
         .expand_width()
         .controller(ValueChanged::new(|_,_, data,_| {
             let cmd: &[u8] = match *data as i64 {
-                3 =>  b"led_scorch\0",
-                2 =>  b"led_hot\0",
-                1 =>  b"led_warm\0",
-                0 =>  b"led_auto\0",
-                -1 =>  b"led_cool\0",
-                -2 =>  b"led_cold\0",
-                -3 =>  b"led_freeze\0",
-                _ => b"led_auto\0"
+                3 =>  commands::LED_MIX_SCORCHING,
+                2 =>  commands::LED_MIX_HOT,
+                1 =>  commands::LED_MIX_WARM,
+                0 =>  commands::LED_MIX_AUTO,
+                -1 =>  commands::LED_MIX_COOL,
+                -2 =>  commands::LED_MIX_COLD,
+                -3 =>  commands::LED_MIX_FREEZING,
+                _ => commands::LED_MIX_AUTO
             };
 
             let mut comms = COMMS.lock().unwrap();
-            comms.send(cmd).unwrap();
+            comms.cmd(cmd).unwrap();
 
         }))
         .lens(AppState::light_mix);

@@ -1,4 +1,4 @@
 mod channel;
-mod commands;
+pub mod commands;
 
-pub use {channel::Channel, channel::COMMS, commands::CMD};
+pub use {channel::Channel, channel::COMMS};

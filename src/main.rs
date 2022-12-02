@@ -7,6 +7,7 @@ use druid::widget::{CrossAxisAlignment, Flex, FlexParams, Padding};
 use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WindowDesc};
 use enigo::{Enigo, KeyboardControllable, MouseControllable};
 use trex_ui::actions::build_actions;
+use trex_ui::comms::{COMMS, Channel, commands};
 use trex_ui::connection_status::build_connection_status;
 use trex_ui::controls::build_controls;
 use trex_ui::lights::build_lights;
@@ -24,6 +25,15 @@ fn main() -> Result<(), PlatformError> {
         .window_size((900., 900.))
         .with_min_size((640., 540.));
 
+    Channel::listen(|cmd: String| {
+        
+        println!("string: {:#?}", cmd);
+        println!("as bytes: {:#?}", cmd.as_bytes());
+        println!("pong: {:#?}", commands::PONG);
+        println!("is match: {:#?}", commands::PONG == cmd.as_bytes());
+        
+    });
+        
     let data = AppState::default();
 
     Ok(AppLauncher::with_window(main_window)

@@ -1,10 +1,7 @@
 #include "queue.h"
 #include "state_button.h"
 
-#define SUCCESS = 0;
-#define ERROR = 1;
-
-// #region CRADLE
+#pragma region CRADLE
 const unsigned short CRADLE_RIGHT_CLOSE_MOTOR = 2;
 const unsigned short CRADLE_RIGHT_OPEN_MOTOR = 3;
 const unsigned short CRADLE_LEFT_CLOSE_MOTOR = 4;
@@ -19,17 +16,18 @@ const unsigned short CRADLE_UP_MOTOR = 33;
 const unsigned short CRADLE_DOWN_MOTOR = 35;
 const unsigned short CRADLE_UP_SENSOR = 32;
 const unsigned short CRADLE_DOWN_SENSOR = 34;
-// #endregion CRADLE
+#pragma endregion CRADLE
 
-// #region GLASS
+#pragma region GLASS
 const unsigned short GLASS_UP_MOTOR = 31;
 const unsigned short GLASS_DOWN_MOTOR = 29;
 const unsigned short GLASS_UP_SENSOR = 28;
 const unsigned short GLASS_DOWN_SENSOR = 30;
 
 const unsigned short GLASS_AUTOLEVEL_SENSOR = 36;
-// #endregion GLASS
+#pragma endregion GLASS
 
+#pragma region MISC
 const unsigned short LED_WHITE = 7;
 const unsigned short LED_YELLOW = 6;
 
@@ -41,86 +39,137 @@ const unsigned short CAMERA_LEFT_POWER = 38;
 const unsigned short CAMERA_RIGHT_POWER = 40;
 
 const unsigned short MASTER_POWER = 39;
+#pragma endregion MISC
 
+#pragma region STATE
 
-/// toggle scan mode
+#define LED_LEVEL_DEFAULT 24
+#define LED_LEVEL_OFF 0
+#define LED_LEVEL_LOW 85
+#define LED_LEVEL_MID 170
+#define LED_LEVEL_MAX 255
+unsigned short WhiteLedLevel = LED_LEVEL_DEFAULT;
+unsigned short YellowLedLevel = LED_LEVEL_DEFAULT;
+
+void noop(struct StateButton *btn) {}
+
+void debug(struct StateButton *btn) {
+
+  if (btn->counter % 2 == 0)
+    Serial.println("RELEASED");
+  else
+    Serial.println("PUSHED");
+
+  Serial.print("PIN: ");
+  Serial.println(btn->PIN);
+  Serial.print("STATE: ");
+  Serial.println(btn->state);
+  Serial.print("COUNTER: ");
+  Serial.println(btn->counter);
+}
+
+struct StateButton stateButtons[] = {
+  { PEDAL, 0U, 0, 0, 0, 0, 0U, handle_pedal },              // 0
+  { CRADLE_LEFT_OPEN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },    // 1
+  { CRADLE_LEFT_CLOSE_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },   // 2
+  { CRADLE_RIGHT_OPEN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },   // 3
+  { CRADLE_RIGHT_CLOSE_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },  // 4
+  { CRADLE_UP_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },           // 5
+  { CRADLE_DOWN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },         // 6
+  { GLASS_UP_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },            // 7
+  { GLASS_DOWN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },          // 8
+  { GLASS_AUTOLEVEL_SENSOR, 0U, 0, 1, 1, 0, 0U, noop },     // 9
+};
+
+#pragma endregion STATE
+
+#pragma region METHODS
+
+/// Handle pedal
+void handle_pedal(struct StateButton *pedal) {
+
+  if (pedal->counter % 2 == 0) {
+    // RELEASED
+    digitalWrite(LASER, HIGH);
+
+    analogWrite(LED_WHITE, LED_LEVEL_DEFAULT);
+    analogWrite(LED_YELLOW, LED_LEVEL_DEFAULT);
+  } else {
+    // PUSHED
+    digitalWrite(LASER, LOW);
+
+    analogWrite(LED_WHITE, WhiteLedLevel);
+    analogWrite(LED_YELLOW, YellowLedLevel);
+  }
+}
+
+/// Toggle scan mode
 void set_scan_mode(unsigned short mode) {
 }
 
-/// toggle scan order
+/// Toggle scan order
 void set_scan_order(short order) {
 }
 
-/// start the automatic adjustment process
+/// Start the automatic adjustment process
 void automatic_adjustment() {
 }
 
-/// start the calibration process
+/// Start the calibration process
 void calibrate() {
 }
 
-/// start moving both gradles up
+/// Start moving both gradles up
 void gradle_up() {
 }
 
-/// start moving both gradles down
+/// Start moving both gradles down
 void gradle_down() {
 }
 
-/// start moving both gradles towards eachother
+/// Start moving both gradles towards eachother
 void gradle_close() {
 }
 
-/// start moving both gradles away from eachother
+/// Start moving both gradles away from eachother
 void gradle_open() {
 }
 
-/// start moving both gradles left
+/// Start moving both gradles left
 void gradle_left() {
 }
 
-/// start moving both gradles right
+/// Start moving both gradles right
 void gradle_right() {
 }
 
-/// stop all gradle motors
+/// Stop all gradle motors
 void gradle_stop() {
 }
 
-/// start moving the left gradle away from the center (left)
+/// Start moving the left gradle away from the center (left)
 /// @sensorsafe
 void gradle_left_open() {
 }
 
-/// start moving the right gradle towards the center (right)
+/// Start moving the right gradle towards the center (right)
 /// @sensorsafe
 void gradle_left_close() {
 }
 
-/// start moving the right gradle away from the center (right)
+/// Start moving the right gradle away from the center (right)
 /// @sensorsafe
 void gradle_right_open() {
 }
 
-/// start moving the right gradle towards the center (left)
+/// Start moving the right gradle towards the center (left)
 /// @sensorsafe
 void gradle_right_close() {
 }
 
-// struct StateButton stateButtons[] = {
-//     {4U, 0U, 0, 0, 0, 0, 0U, nothing},                     // 0  Buzzer
-//     {13U, 0U, 0, 0, 0, 0, 0U, nothing},                    // 1  LED Mode (DEPRECATED)
-//     {A0, 0U, 0, 0, 0, 0, 0U, open_cradle},                 // 2  Cradle Open Button
-//     {A1, 0U, 0, 0, 0, 0, 0U, close_cradle},                // 3  Cradle Close Button
-//     {A2, 0U, 0, 0, 0, 0, 0U, handle_pedal},                // 4  Pedal
-//     {A3, 0U, 0, 0, 0, 0, 0U, switch_ord},                  // 5  Scan Order Selector
-//     {A4, 0U, 0, 0, 0, 0, 0U, switch_mode},                 // 6  Scan Mode & Calibration
-//     {A5, 0U, 0, 0, 0, 0, 0U, handle_scan_button},          // 7  Scan
-//     {8U, 0U, 0, 1, 1, 0, 0U, handle_glass_down_sensor},    // 8  Glass Down Sensor
-//     {7U, 0U, 0, 1, 1, 0, 0U, handle_glass_up_sensor},      // 9  Glass Up Sensor
-//     {12U, 0U, 0, 1, 1, 0, 0U, handle_cradle_open_sensor},  // 10 Cradle Open Sensor  (BLUE)
-//     {11U, 0U, 0, 1, 1, 0, 0U, handle_cradle_close_sensor}, // 11 Cradle Clsoe Sensor (GREEN)
-// };
+#pragma endregion METHODS
+
+#pragma region COMMANDS
 
 #define CMD_PING "ping"
 #define CMD_PONG "pong"
@@ -136,6 +185,7 @@ void gradle_right_close() {
 #define CMD_LED_MIX_COLD "led_cold"
 #define CMD_LED_MIX_FREEZING "led_freeze"
 
+#pragma endregion COMMANDS
 
 // handle an incoming message and map it to the correct function
 String handle_message(String msg) {
@@ -148,60 +198,76 @@ String handle_message(String msg) {
   } else if (msg == CMD_LASER_OFF) {
     digitalWrite(LASER, LOW);
     return "laser is off";
-  }
-  else if (msg == CMD_LED_MIX_SCORCHING) {
-    analogWrite(LED_YELLOW, 255);
-    analogWrite(LED_WHITE, 0);
-    return "\0";
+  } else if (msg == CMD_LED_MIX_SCORCHING) {
+    // analogWrite(LED_YELLOW, 255);
+    // analogWrite(LED_WHITE, 0);
+    WhiteLedLevel = LED_LEVEL_MAX;
+    YellowLedLevel = LED_LEVEL_OFF;
+    return "";
   } else if (msg == CMD_LED_MIX_HOT) {
-    analogWrite(LED_YELLOW, 255);
-    analogWrite(LED_WHITE, 85);
-    return "\0";
+    // analogWrite(LED_YELLOW, 255);
+    // analogWrite(LED_WHITE, 85);
+    WhiteLedLevel = LED_LEVEL_MAX;
+    YellowLedLevel = LED_LEVEL_LOW;
+    return "";
   } else if (msg == CMD_LED_MIX_WARM) {
-    analogWrite(LED_YELLOW, 255);
-    analogWrite(LED_WHITE, 170);
-    return "\0";
+    // analogWrite(LED_YELLOW, 255);
+    // analogWrite(LED_WHITE, 170);
+    WhiteLedLevel = LED_LEVEL_MAX;
+    YellowLedLevel = LED_LEVEL_MID;
+    return "";
   } else if (msg == CMD_LED_MIX_AUTO) {
-    analogWrite(LED_YELLOW, 255);
-    analogWrite(LED_WHITE, 255);
-    return "\0";
+    // analogWrite(LED_YELLOW, 255);
+    // analogWrite(LED_WHITE, 255);
+    WhiteLedLevel = LED_LEVEL_MAX;
+    YellowLedLevel = LED_LEVEL_MAX;
+    return "";
   } else if (msg == CMD_LED_MIX_COOL) {
-    analogWrite(LED_YELLOW, 170);
-    analogWrite(LED_WHITE, 255);
-    return "\0";
+    // analogWrite(LED_YELLOW, 170);
+    // analogWrite(LED_WHITE, 255);
+    WhiteLedLevel = LED_LEVEL_MID;
+    YellowLedLevel = LED_LEVEL_MAX;
+    return "";
   } else if (msg == CMD_LED_MIX_COLD) {
-    analogWrite(LED_YELLOW, 85);
-    analogWrite(LED_WHITE, 255);
-    return "\0";
+    // analogWrite(LED_YELLOW, 85);
+    // analogWrite(LED_WHITE, 255);
+    WhiteLedLevel = LED_LEVEL_LOW;
+    YellowLedLevel = LED_LEVEL_MAX;
+    return "";
   } else if (msg == CMD_LED_MIX_FREEZING) {
-    analogWrite(LED_YELLOW, 0);
-    analogWrite(LED_WHITE, 255);
-    return "\0";
+    // analogWrite(LED_YELLOW, 0);
+    // analogWrite(LED_WHITE, 255);
+    WhiteLedLevel = LED_LEVEL_OFF;
+    YellowLedLevel = LED_LEVEL_MAX;
+    return "";
   }
 
   return "command not found: " + msg;
 }
 
 void setup() {
+
+  digitalWrite(LASER, HIGH);
+  analogWrite(LED_YELLOW, LED_LEVEL_DEFAULT);
+  analogWrite(LED_WHITE, LED_LEVEL_DEFAULT);
+
   Serial.begin(9600);
   while (!Serial)  // do not continue with the program untill a serial connection to the board has been established
   {};
   Serial.println("TREX READY");
 }
 
-const unsigned int MAX_MESSAGE_LENGTH = 32;
-
-// Create a place to hold the incoming message
+// Create a buffer to hold the incoming message
 String message = "";
+const unsigned int MAX_MESSAGE_LENGTH = 32;
 
 void loop() {
 
-  // while (Serial.available() > 0) {
-  //   // received message
-  //   int inByte = Serial.read();
-  //   int response = handle_message(inByte);
-  //   Serial.print(response);
-  // }
+  // Cycle state buttons
+  for (int i = 0; i < sizeof(stateButtons) / sizeof(struct StateButton); i++)
+    state_button_check(&stateButtons[i]);
+
+  // doChores();
 
   while (Serial.available() > 0) {
     // received message
@@ -211,38 +277,12 @@ void loop() {
       // message ended
 
       String response = handle_message(message);
-      Serial.print(response + '\0');
-      message = ""; 
+      Serial.print(response);
+      message = "";
 
     } else {
       // message incoming
       message += inByte;
     }
   }
-
-  // // Check to see if anything is available in the serial receive buffer
-  // while (Serial.available() > 0) {
-  //   // Read the next available byte in the serial receive buffer
-  //   char inByte = Serial.read();
-
-  //   // Message coming in (check not terminating character) and guard for over message size
-  //   if (inByte == '\0' || (message_pos < MAX_MESSAGE_LENGTH - 1)) {
-
-  //     // Add null character to string
-  //     message[message_pos] = '\0';
-
-  //     // Print the message (or do other things)
-  //     Serial.println(message);
-
-  //     // Reset for the next message
-  //     message_pos = 0;
-
-  //     continue;
-  //   }
-  //   // Full message received...
-
-  //   // Add the incoming byte to our message
-  //   message[message_pos] = inByte;
-  //   message_pos++;
-  // }
 }
