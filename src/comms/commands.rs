@@ -20,3 +20,8 @@ pub const CRADLE_UP: &[u8] = b"cradle_up";
 pub const CRADLE_UP_STOP: &[u8] = b"cradle_up_stop";
 pub const CRADLE_DOWN: &[u8] = b"cradle_down";
 pub const CRADLE_DOWN_STOP: &[u8] = b"cradle_down_stop";
+
+pub const CALIBRATION_START: &[u8] = b"calibration_start";
+pub const CALIBRATION_STOP: &[u8] = b"calibration_stop";
+pub const CALIBRATION_TIMEOUT: &[u8] = b"calibration_timeout";
+pub const CALIBRATION_PREVENTED: &[u8] = b"calibration_prevented";

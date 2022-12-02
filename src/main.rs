@@ -1,10 +1,7 @@
 #![windows_subsystem = "windows"]
 
-use std::thread;
-use std::time::Duration;
-
 use druid::widget::{CrossAxisAlignment, Flex, FlexParams, Padding};
-use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WindowDesc, Command};
+use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WindowDesc};
 use enigo::{Enigo, KeyboardControllable, MouseControllable};
 use trex_ui::actions::build_actions;
 use trex_ui::comms::{commands, Channel, COMMS};
@@ -19,13 +16,19 @@ use trex_ui::AppState;
 fn main() -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(ui_builder())
         .title("T-Rex Control Panel")
-        .window_size((900., 900.))
+        .window_size((950., 900.))
         .with_min_size((640., 540.));
 
-    let data = AppState::default();
+    let mut data = AppState::default();
+    data.counter = 0.5;
 
     let launcher = AppLauncher::with_window(main_window);
     let event_sink = launcher.get_external_handle();
+
+    {
+        let comms = COMMS.lock().unwrap();
+        data.connected_to = Some(comms.port_name.clone());
+    }
 
     // handle incoming events
     Channel::listen(move |cmd: String| {
@@ -33,18 +36,20 @@ fn main() -> Result<(), PlatformError> {
         // println!("as bytes: {:#?}", cmd.as_bytes());
         // println!("pong: {:#?}", commands::PONG);
         // println!("is match: {:#?}", commands::PONG == cmd.as_bytes());
-        
-        event_sink.add_idle_callback(move |data: &mut AppState| {
 
+        event_sink.add_idle_callback(move |data: &mut AppState| {
             let as_bytes = cmd.as_bytes();
 
             match as_bytes {
                 commands::PEDAL_SCAN => {
                     send_key(data);
                 },
-                _ => ()
+                commands::CALIBRATION_PREVENTED | commands::CALIBRATION_STOP | commands::CALIBRATION_TIMEOUT => {
+                    data.is_calibrating = false;
+                }
+                _ => (),
             }
-            
+
             let log = format!("[EVENT] {}\n", cmd);
             data.logs.push_str(log.as_str());
         });
@@ -74,12 +79,10 @@ fn ui_builder() -> impl Widget<AppState> {
                     .with_spacer(SIZE_L)
                     .with_child(build_lights())
                     .with_spacer(SIZE_L)
-                    .with_child(build_controls())
-                    // test buttons
-                    // .with_child(Button::new("Test").on_click(count_up))
-                    // .with_child(Button::new("Hello World").on_click(autogui_hello_world))
-                    // .with_child(Button::new("Scan").on_click(send_key))
-                    ,
+                    .with_child(build_controls()), // test buttons
+                                                   // .with_child(Button::new("Test").on_click(count_up))
+                                                   // .with_child(Button::new("Hello World").on_click(autogui_hello_world))
+                                                   // .with_child(Button::new("Scan").on_click(send_key))
                 1.,
             )
             .with_spacer(SIZE_XXL)
@@ -98,7 +101,7 @@ fn autogui_hello_world(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
 }
 
 fn count_up(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
-    data.counter += 1;
+    data.counter += 1.;
     data.scan_order = match data.scan_order {
         ScanOrder::Left => ScanOrder::Right,
         ScanOrder::Right => ScanOrder::RightThenLeft,
@@ -107,8 +110,6 @@ fn count_up(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
         ScanOrder::InApp => ScanOrder::InApp2,
         ScanOrder::InApp2 => ScanOrder::Left,
     };
-
-    data.is_connected = !data.is_connected;
 
     let mut c = data.logs.clone();
     c.push_str("Hello ");

@@ -172,10 +172,10 @@ pub fn build_controls() -> impl Widget<AppState> {
 }
 
 fn ping(_data: &mut AppState) {
+
     let mut comms = COMMS.lock().unwrap();
-    comms.cmd(b"ping\0").unwrap();
-    let response = comms.read_str().unwrap();
-    _data.logs.push_str(response.as_str());
+    comms.cmd(commands::PING).unwrap();
+
     thread::spawn(move || {
         let mut enigo = Enigo::new();
         thread::sleep(Duration::from_millis(5000));

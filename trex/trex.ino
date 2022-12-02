@@ -30,6 +30,11 @@ struct CommandMap {
 #define CRADLE_DOWN "cradle_down"
 #define CRADLE_DOWN_STOP "cradle_down_stop"
 
+#define CALIBRATION_START "calibration_start"
+#define CALIBRATION_STOP "calibration_stop"
+#define CALIBRATION_TIMEOUT "calibration_timeout"
+#define CALIBRATION_PREVENTED "calibration_prevented"
+
 #pragma endregion COMMANDS
 
 #pragma region CRADLE
@@ -81,6 +86,8 @@ const unsigned short MASTER_POWER = 39;
 #define LED_LEVEL_MAX 255
 unsigned short WhiteLedLevel = LED_LEVEL_DEFAULT;
 unsigned short YellowLedLevel = LED_LEVEL_DEFAULT;
+
+unsigned long CALIBRATION_DURATION = 1000U * 60U * 3U;
 
 void noop(struct StateButton *a) {}
 String noop() {
@@ -135,6 +142,30 @@ void handle_cradle_down_sensor(struct StateButton *btn) {
   Serial.print("Down sensor stalled");
 }
 
+// Attempts to spin the glass up
+// Does nothing if the up sensor won't allow it
+bool spin_glass_up() {
+  if (digitalRead(GLASS_UP_SENSOR) == HIGH) {
+    digitalWrite(GLASS_UP_MOTOR, LOW);     // start
+    digitalWrite(GLASS_DOWN_MOTOR, HIGH);  // stop
+    return true;
+  }
+
+  return false;
+}
+
+// Attempts to spin the glass down
+// Does nothing if the down sensor won't allow it
+bool spin_glass_down() {
+  if (digitalRead(GLASS_DOWN_SENSOR) == HIGH) {
+    digitalWrite(GLASS_DOWN_MOTOR, LOW);  // start
+    digitalWrite(GLASS_UP_MOTOR, HIGH);   // stop
+    return true;
+  }
+
+  return false;
+}
+
 /// Handle pedal
 void handle_pedal(struct StateButton *pedal) {
 
@@ -159,13 +190,13 @@ void handle_pedal(struct StateButton *pedal) {
 /// Turn laser On
 String laser_on(String msg) {
   digitalWrite(LASER, HIGH);
-  return "laser is on";
+  return "Laser is on";
 }
 
 /// Turn laser Off
 String laser_off(String msg) {
   digitalWrite(LASER, LOW);
-  return "laser is off";
+  return "Laser is off";
 }
 
 /// Mix between led
@@ -242,7 +273,33 @@ String automatic_adjustment(String msg) {
 }
 
 /// Start the calibration process
-String calibrate(String msg) {
+String calibration_start(String msg) {
+
+  if (spin_glass_down() == false)
+    return CALIBRATION_PREVENTED;
+
+
+  Serial.print(CALIBRATION_START);
+
+  unsigned long then = millis();
+
+  while (millis() < then + CALIBRATION_DURATION) {
+    // wait till calibration duration ends or user cancels calibration
+
+    String cmd = check_for_cmd();
+
+    if (cmd == CALIBRATION_STOP)
+      return calibration_stop(cmd);
+  }
+
+  return CALIBRATION_TIMEOUT;
+}
+
+String calibration_stop(String msg) {
+
+
+
+  return CALIBRATION_STOP;
 }
 
 /// Start moving both cradles up
@@ -335,6 +392,8 @@ struct CommandMap commandMap[] {
     { CRADLE_UP_STOP, cradle_stop },
     { CRADLE_DOWN, cradle_down },
     { CRADLE_DOWN_STOP, cradle_stop },
+    { CALIBRATION_START, calibration_start },
+    { CALIBRATION_STOP, calibration_stop },
 };
 
 // handle an incoming message and map it to the correct function
@@ -379,9 +438,6 @@ void setup() {
   Serial.println("TREX READY");
 }
 
-// Create a buffer to hold the incoming message
-String message = "";
-const unsigned int MAX_MESSAGE_LENGTH = 32;
 
 void loop() {
 
@@ -391,6 +447,18 @@ void loop() {
 
   // doChores();
 
+  String message = check_for_cmd();
+
+  if (message == "") return;
+  
+  String response = handle_message(message);
+  Serial.print(response);
+}
+
+// Create a buffer to hold the incoming message
+String message = "";
+const unsigned int MAX_MESSAGE_LENGTH = 32;
+String check_for_cmd() {
   while (Serial.available() > 0) {
     // received message
     char inByte = Serial.read();
@@ -398,13 +466,16 @@ void loop() {
     if (inByte == '\n' || inByte == '\0') {
       // message ended
 
-      String response = handle_message(message);
-      Serial.print(response);
+      String temp = message;
       message = "";
+
+      return temp;
 
     } else {
       // message incoming
       message += inByte;
     }
   }
+
+  return "";
 }
