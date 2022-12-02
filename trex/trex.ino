@@ -1,6 +1,26 @@
 #include "queue.h"
 #include "state_button.h"
 
+#pragma region COMMANDS
+
+#define CMD_PING "ping"
+#define CMD_PONG "pong"
+
+#define CMD_LASER_ON "laser_on"
+#define CMD_LASER_OFF "laser_off"
+
+#define CMD_LED_MIX_SCORCHING "led_scorch"
+#define CMD_LED_MIX_HOT "led_hot"
+#define CMD_LED_MIX_WARM "led_warm"
+#define CMD_LED_MIX_AUTO "led_auto"
+#define CMD_LED_MIX_COOL "led_cool"
+#define CMD_LED_MIX_COLD "led_cold"
+#define CMD_LED_MIX_FREEZING "led_freeze"
+
+#define CMD_PEDAL_SCAN "pedal_scan"
+
+#pragma endregion COMMANDS
+
 #pragma region CRADLE
 const unsigned short CRADLE_RIGHT_CLOSE_MOTOR = 2;
 const unsigned short CRADLE_RIGHT_OPEN_MOTOR = 3;
@@ -100,6 +120,8 @@ void handle_pedal(struct StateButton *pedal) {
 
     analogWrite(LED_WHITE, WhiteLedLevel);
     analogWrite(LED_YELLOW, YellowLedLevel);
+
+    Serial.print(CMD_PEDAL_SCAN);
   }
 }
 
@@ -168,24 +190,6 @@ void gradle_right_close() {
 }
 
 #pragma endregion METHODS
-
-#pragma region COMMANDS
-
-#define CMD_PING "ping"
-#define CMD_PONG "pong"
-
-#define CMD_LASER_ON "laser_on"
-#define CMD_LASER_OFF "laser_off"
-
-#define CMD_LED_MIX_SCORCHING "led_scorch"
-#define CMD_LED_MIX_HOT "led_hot"
-#define CMD_LED_MIX_WARM "led_warm"
-#define CMD_LED_MIX_AUTO "led_auto"
-#define CMD_LED_MIX_COOL "led_cool"
-#define CMD_LED_MIX_COLD "led_cold"
-#define CMD_LED_MIX_FREEZING "led_freeze"
-
-#pragma endregion COMMANDS
 
 // handle an incoming message and map it to the correct function
 String handle_message(String msg) {

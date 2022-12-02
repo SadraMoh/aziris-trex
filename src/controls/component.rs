@@ -31,7 +31,7 @@ fn scan(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::PING).unwrap();
     
-    // send_key(_data);
+    send_key(_data);
     
 }
 
@@ -39,7 +39,7 @@ const SCAN_DELAY: u64 = 350;
 const RIGHT_KEY: enigo::Key = enigo::Key::F9;
 const LEFT_KEY: enigo::Key = enigo::Key::F8;
 const INAPP_KEY: enigo::Key = enigo::Key::F10;
-fn send_key(data: &mut AppState) {
+pub fn send_key(data: &mut AppState) {
     let mut enigo = Enigo::new();
 
     // enigo.mouse_move_to(600, 200);
