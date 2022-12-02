@@ -3,6 +3,12 @@
 
 #pragma region COMMANDS
 
+typedef String (*CommandHandler)(String msg);
+struct CommandMap {
+  String cmd;
+  CommandHandler func;
+};
+
 #define CMD_PING "ping"
 #define CMD_PONG "pong"
 
@@ -18,6 +24,11 @@
 #define CMD_LED_MIX_FREEZING "led_freeze"
 
 #define CMD_PEDAL_SCAN "pedal_scan"
+
+#define CRADLE_UP "cradle_up"
+#define CRADLE_UP_STOP "cradle_up_stop"
+#define CRADLE_DOWN "cradle_down"
+#define CRADLE_DOWN_STOP "cradle_down_stop"
 
 #pragma endregion COMMANDS
 
@@ -71,7 +82,10 @@ const unsigned short MASTER_POWER = 39;
 unsigned short WhiteLedLevel = LED_LEVEL_DEFAULT;
 unsigned short YellowLedLevel = LED_LEVEL_DEFAULT;
 
-void noop(struct StateButton *btn) {}
+void noop(struct StateButton *a) {}
+String noop() {
+  return "";
+}
 
 void debug(struct StateButton *btn) {
 
@@ -89,21 +103,37 @@ void debug(struct StateButton *btn) {
 }
 
 struct StateButton stateButtons[] = {
-  { PEDAL, 0U, 0, 0, 0, 0, 0U, handle_pedal },              // 0
-  { CRADLE_LEFT_OPEN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },    // 1
-  { CRADLE_LEFT_CLOSE_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },   // 2
-  { CRADLE_RIGHT_OPEN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },   // 3
-  { CRADLE_RIGHT_CLOSE_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },  // 4
-  { CRADLE_UP_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },           // 5
-  { CRADLE_DOWN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },         // 6
-  { GLASS_UP_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },            // 7
-  { GLASS_DOWN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },          // 8
-  { GLASS_AUTOLEVEL_SENSOR, 0U, 0, 1, 1, 0, 0U, noop },     // 9
+  { PEDAL, 0U, 0, 0, 0, 0, 0U, handle_pedal },                            // 0
+  { CRADLE_LEFT_OPEN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },                  // 1
+  { CRADLE_LEFT_CLOSE_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },                 // 2
+  { CRADLE_RIGHT_OPEN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },                 // 3
+  { CRADLE_RIGHT_CLOSE_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },                // 4
+  { CRADLE_UP_SENSOR, 0U, 0, 0, 0, 0, 0U, handle_cradle_up_sensor },      // 5
+  { CRADLE_DOWN_SENSOR, 0U, 0, 0, 0, 0, 0U, handle_cradle_down_sensor },  // 6
+  { GLASS_UP_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },                          // 7
+  { GLASS_DOWN_SENSOR, 0U, 0, 0, 0, 0, 0U, noop },                        // 8
+  { GLASS_AUTOLEVEL_SENSOR, 0U, 0, 1, 1, 0, 0U, noop },                   // 9
 };
 
 #pragma endregion STATE
 
 #pragma region METHODS
+
+void handle_cradle_up_sensor(struct StateButton *btn) {
+  if (btn->counter % 2 == 1)
+    return;
+
+  digitalWrite(CRADLE_UP_MOTOR, LOW);  // stop
+  Serial.print("Up sensor stalled");
+}
+
+void handle_cradle_down_sensor(struct StateButton *btn) {
+  if (btn->counter % 2 == 1)
+    return;
+
+  digitalWrite(CRADLE_DOWN_MOTOR, LOW);  // stop
+  Serial.print("Down sensor stalled");
+}
 
 /// Handle pedal
 void handle_pedal(struct StateButton *pedal) {
@@ -114,6 +144,7 @@ void handle_pedal(struct StateButton *pedal) {
 
     analogWrite(LED_WHITE, LED_LEVEL_DEFAULT);
     analogWrite(LED_YELLOW, LED_LEVEL_DEFAULT);
+
   } else {
     // PUSHED
     digitalWrite(LASER, LOW);
@@ -125,120 +156,69 @@ void handle_pedal(struct StateButton *pedal) {
   }
 }
 
-/// Toggle scan mode
-void set_scan_mode(unsigned short mode) {
+/// Turn laser On
+String laser_on(String msg) {
+  digitalWrite(LASER, HIGH);
+  return "laser is on";
 }
 
-/// Toggle scan order
-void set_scan_order(short order) {
+/// Turn laser Off
+String laser_off(String msg) {
+  digitalWrite(LASER, LOW);
+  return "laser is off";
 }
 
-/// Start the automatic adjustment process
-void automatic_adjustment() {
-}
-
-/// Start the calibration process
-void calibrate() {
-}
-
-/// Start moving both gradles up
-void gradle_up() {
-}
-
-/// Start moving both gradles down
-void gradle_down() {
-}
-
-/// Start moving both gradles towards eachother
-void gradle_close() {
-}
-
-/// Start moving both gradles away from eachother
-void gradle_open() {
-}
-
-/// Start moving both gradles left
-void gradle_left() {
-}
-
-/// Start moving both gradles right
-void gradle_right() {
-}
-
-/// Stop all gradle motors
-void gradle_stop() {
-}
-
-/// Start moving the left gradle away from the center (left)
-/// @sensorsafe
-void gradle_left_open() {
-}
-
-/// Start moving the right gradle towards the center (right)
-/// @sensorsafe
-void gradle_left_close() {
-}
-
-/// Start moving the right gradle away from the center (right)
-/// @sensorsafe
-void gradle_right_open() {
-}
-
-/// Start moving the right gradle towards the center (left)
-/// @sensorsafe
-void gradle_right_close() {
-}
-
-#pragma endregion METHODS
-
-// handle an incoming message and map it to the correct function
-String handle_message(String msg) {
-
-  if (msg == CMD_PING) {
-    return CMD_PONG;
-  } else if (msg == CMD_LASER_ON) {
-    digitalWrite(LASER, HIGH);
-    return "laser is on";
-  } else if (msg == CMD_LASER_OFF) {
-    digitalWrite(LASER, LOW);
-    return "laser is off";
-  } else if (msg == CMD_LED_MIX_SCORCHING) {
+/// Mix between led
+String mix_leds(String msg) {
+  if (msg == CMD_LED_MIX_SCORCHING) {
     // analogWrite(LED_YELLOW, 255);
     // analogWrite(LED_WHITE, 0);
     WhiteLedLevel = LED_LEVEL_MAX;
     YellowLedLevel = LED_LEVEL_OFF;
     return "";
-  } else if (msg == CMD_LED_MIX_HOT) {
+  }
+
+  if (msg == CMD_LED_MIX_HOT) {
     // analogWrite(LED_YELLOW, 255);
     // analogWrite(LED_WHITE, 85);
     WhiteLedLevel = LED_LEVEL_MAX;
     YellowLedLevel = LED_LEVEL_LOW;
     return "";
-  } else if (msg == CMD_LED_MIX_WARM) {
+  }
+
+  if (msg == CMD_LED_MIX_WARM) {
     // analogWrite(LED_YELLOW, 255);
     // analogWrite(LED_WHITE, 170);
     WhiteLedLevel = LED_LEVEL_MAX;
     YellowLedLevel = LED_LEVEL_MID;
     return "";
-  } else if (msg == CMD_LED_MIX_AUTO) {
+  }
+
+  if (msg == CMD_LED_MIX_AUTO) {
     // analogWrite(LED_YELLOW, 255);
     // analogWrite(LED_WHITE, 255);
     WhiteLedLevel = LED_LEVEL_MAX;
     YellowLedLevel = LED_LEVEL_MAX;
     return "";
-  } else if (msg == CMD_LED_MIX_COOL) {
+  }
+
+  if (msg == CMD_LED_MIX_COOL) {
     // analogWrite(LED_YELLOW, 170);
     // analogWrite(LED_WHITE, 255);
     WhiteLedLevel = LED_LEVEL_MID;
     YellowLedLevel = LED_LEVEL_MAX;
     return "";
-  } else if (msg == CMD_LED_MIX_COLD) {
+  }
+
+  if (msg == CMD_LED_MIX_COLD) {
     // analogWrite(LED_YELLOW, 85);
     // analogWrite(LED_WHITE, 255);
     WhiteLedLevel = LED_LEVEL_LOW;
     YellowLedLevel = LED_LEVEL_MAX;
     return "";
-  } else if (msg == CMD_LED_MIX_FREEZING) {
+  }
+
+  if (msg == CMD_LED_MIX_FREEZING) {
     // analogWrite(LED_YELLOW, 0);
     // analogWrite(LED_WHITE, 255);
     WhiteLedLevel = LED_LEVEL_OFF;
@@ -246,10 +226,148 @@ String handle_message(String msg) {
     return "";
   }
 
-  return "command not found: " + msg;
+  return "err in mix_leds";
+}
+
+/// Toggle scan mode
+String set_scan_mode(String msg) {
+}
+
+/// Toggle scan order
+String set_scan_order(String msg) {
+}
+
+/// Start the automatic adjustment process
+String automatic_adjustment(String msg) {
+}
+
+/// Start the calibration process
+String calibrate(String msg) {
+}
+
+/// Start moving both cradles up
+String cradle_up(String msg) {
+  if (digitalRead(CRADLE_UP_SENSOR) == LOW)
+    return "Up sensor stalled";
+
+  digitalWrite(CRADLE_DOWN_MOTOR, LOW);  // stop
+  digitalWrite(CRADLE_UP_MOTOR, HIGH);   // start
+  return "Cradle moving up";
+}
+
+/// Start moving both cradles down
+String cradle_down(String msg) {
+  if (digitalRead(CRADLE_DOWN_SENSOR) == LOW)
+    return "Down sensor stalled";
+
+  digitalWrite(CRADLE_UP_MOTOR, LOW);     // stop
+  digitalWrite(CRADLE_DOWN_MOTOR, HIGH);  // start
+  return "Cradle moving down";
+}
+
+/// Start moving both cradles towards eachother
+String cradle_close(String msg) {
+}
+
+/// Start moving both cradles away from eachother
+String cradle_open(String msg) {
+}
+
+/// Start moving both cradles left
+String cradle_left(String msg) {
+}
+
+/// Start moving both cradles right
+String cradle_right(String msg) {
+}
+
+/// Stop all cradle motors
+String cradle_stop(String msg) {
+  analogWrite(CRADLE_UP_MOTOR, LOW);           // stop
+  analogWrite(CRADLE_DOWN_MOTOR, LOW);         // stop
+  analogWrite(CRADLE_LEFT_OPEN_MOTOR, LOW);    // stop
+  analogWrite(CRADLE_LEFT_CLOSE_MOTOR, LOW);   // stop
+  analogWrite(CRADLE_RIGHT_OPEN_MOTOR, LOW);   // stop
+  analogWrite(CRADLE_RIGHT_CLOSE_MOTOR, LOW);  // stop
+  return "Cradle stopped";
+}
+
+/// Start moving the left cradle away from the center (left)
+/// @sensorsafe
+String cradle_left_open(String msg) {
+}
+
+/// Start moving the right cradle towards the center (right)
+/// @sensorsafe
+String cradle_left_close(String msg) {
+}
+
+/// Start moving the right cradle away from the center (right)
+/// @sensorsafe
+String cradle_right_open(String msg) {
+}
+
+/// Start moving the right cradle towards the center (left)
+/// @sensorsafe
+String cradle_right_close(String msg) {
+}
+
+#pragma endregion METHODS
+
+// Map commands to functions
+struct CommandMap commandMap[] {
+  // {
+  //   CMD_PING,
+  //   [](String msg) {
+  //     return (String)CMD_PONG;
+  //   }
+  // },
+  { CMD_LASER_ON, laser_on },
+    { CMD_LASER_OFF, laser_off },
+    { CMD_LED_MIX_SCORCHING, mix_leds },
+    { CMD_LED_MIX_HOT, mix_leds },
+    { CMD_LED_MIX_WARM, mix_leds },
+    { CMD_LED_MIX_AUTO, mix_leds },
+    { CMD_LED_MIX_COOL, mix_leds },
+    { CMD_LED_MIX_COLD, mix_leds },
+    { CMD_LED_MIX_FREEZING, mix_leds },
+    { CRADLE_UP, cradle_up },
+    { CRADLE_UP_STOP, cradle_stop },
+    { CRADLE_DOWN, cradle_down },
+    { CRADLE_DOWN_STOP, cradle_stop },
+};
+
+// handle an incoming message and map it to the correct function
+String handle_message(String msg) {
+
+  if (msg == CMD_PING)
+    return CMD_PONG;
+
+  for (struct CommandMap map : commandMap)
+    if (msg == map.cmd)
+      return map.func(msg);
+
+  return "ENOCMD: " + msg;
 }
 
 void setup() {
+
+  // Button PinModes
+  for (struct StateButton btn : stateButtons)
+    pinMode(btn.PIN, INPUT);
+
+  pinMode(LASER, OUTPUT);
+  pinMode(LED_YELLOW, OUTPUT);
+  pinMode(LED_WHITE, OUTPUT);
+
+  pinMode(CRADLE_RIGHT_CLOSE_MOTOR, OUTPUT);
+  pinMode(CRADLE_RIGHT_OPEN_MOTOR, OUTPUT);
+  pinMode(CRADLE_LEFT_CLOSE_MOTOR, OUTPUT);
+  pinMode(CRADLE_LEFT_OPEN_MOTOR, OUTPUT);
+  pinMode(CRADLE_UP_MOTOR, OUTPUT);
+  pinMode(CRADLE_DOWN_MOTOR, OUTPUT);
+  pinMode(GLASS_UP_MOTOR, OUTPUT);
+  pinMode(GLASS_DOWN_MOTOR, OUTPUT);
 
   digitalWrite(LASER, HIGH);
   analogWrite(LED_YELLOW, LED_LEVEL_DEFAULT);

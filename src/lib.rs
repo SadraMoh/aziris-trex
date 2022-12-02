@@ -1,3 +1,4 @@
+pub mod custom_controllers;
 pub mod actions;
 pub mod comms;
 pub mod connection_status;

@@ -11,7 +11,8 @@ use enigo::{Enigo, KeyboardControllable, MouseControllable};
 
 use crate::{
     atomic::group,
-    comms::{Channel, COMMS, commands},
+    comms::{commands, Channel, COMMS},
+    custom_controllers::ButtonState,
     options::{ScanMode, ScanOrder},
     vars::{SIZE_L, SIZE_S, SIZE_XL},
     AppState,
@@ -23,22 +24,46 @@ fn expand(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
 fn left(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
 fn right(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
 
-fn up(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
-fn down(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
-
-fn scan(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {
+fn up(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
 
     let mut comms = COMMS.lock().unwrap();
-    comms.cmd(commands::PING).unwrap();
-    
-    send_key(_data);
+    comms.cmd(commands::CRADLE_UP).unwrap();
     
 }
 
-const SCAN_DELAY: u64 = 350;
+fn up_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_UP_STOP).unwrap();
+    
+}
+
+fn down(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_DOWN).unwrap();
+    
+}
+
+fn down_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_DOWN_STOP).unwrap();
+    
+}
+
+fn scan(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::PING).unwrap();
+
+    send_key(_data);
+}
+
+const SCAN_DELAY: u64 = 500;
 const RIGHT_KEY: enigo::Key = enigo::Key::F9;
 const LEFT_KEY: enigo::Key = enigo::Key::F8;
 const INAPP_KEY: enigo::Key = enigo::Key::F10;
+const INAPP2_KEY: enigo::Key = enigo::Key::F7;
 pub fn send_key(data: &mut AppState) {
     let mut enigo = Enigo::new();
 
@@ -47,6 +72,7 @@ pub fn send_key(data: &mut AppState) {
 
     match data.scan_order {
         ScanOrder::InApp => enigo.key_click(INAPP_KEY),
+        ScanOrder::InApp2 => enigo.key_click(INAPP2_KEY),
         ScanOrder::Right => enigo.key_click(RIGHT_KEY),
         ScanOrder::Left => enigo.key_click(LEFT_KEY),
         ScanOrder::RightThenLeft => {
@@ -108,14 +134,14 @@ pub fn build_controls() -> impl Widget<AppState> {
                                 Flex::column()
                                     .with_flex_child(
                                         Button::from_label(Label::new("↑").with_font(BUTTON_FONT))
-                                            .on_click(up)
+                                            .controller(ButtonState::new(up, up_stop))
                                             .expand(),
                                         1.,
                                     )
                                     .with_spacer(SIZE_S)
                                     .with_flex_child(
                                         Button::from_label(Label::new("↓").with_font(BUTTON_FONT))
-                                            .on_click(down)
+                                            .controller(ButtonState::new(down, down_stop))
                                             .expand(),
                                         1.,
                                     ),

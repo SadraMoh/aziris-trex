@@ -9,6 +9,7 @@ pub enum ScanOrder {
     RightThenLeft,
     LeftThenRight,
     InApp,
+    InApp2,
 }
 
 impl Default for ScanOrder {

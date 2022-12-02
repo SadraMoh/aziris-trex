@@ -22,6 +22,8 @@ impl Channel {
     pub fn init() -> Result<Self> {
         let ports = available_ports()?;
 
+        println!("{:?}", ports);
+        
         let port: &SerialPortInfo = ports.first().ok_or(Error {
             description: "Avalibe ports list is empty".to_string(),
             kind: ErrorKind::NoDevice,

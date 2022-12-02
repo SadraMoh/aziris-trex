@@ -39,13 +39,13 @@ fn main() -> Result<(), PlatformError> {
             let as_bytes = cmd.as_bytes();
 
             match as_bytes {
-                commands::CMD_PEDAL_SCAN => {
+                commands::PEDAL_SCAN => {
                     send_key(data);
                 },
                 _ => ()
             }
             
-            let log = format!("[DEBUG] {}\n", cmd);
+            let log = format!("[EVENT] {}\n", cmd);
             data.logs.push_str(log.as_str());
         });
     });
@@ -104,7 +104,8 @@ fn count_up(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
         ScanOrder::Right => ScanOrder::RightThenLeft,
         ScanOrder::RightThenLeft => ScanOrder::LeftThenRight,
         ScanOrder::LeftThenRight => ScanOrder::InApp,
-        ScanOrder::InApp => ScanOrder::Left,
+        ScanOrder::InApp => ScanOrder::InApp2,
+        ScanOrder::InApp2 => ScanOrder::Left,
     };
 
     data.is_connected = !data.is_connected;
