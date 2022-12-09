@@ -18,38 +18,64 @@ use crate::{
     AppState,
 };
 
-fn retract(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
-fn expand(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
+fn retract(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_CLOSE).unwrap();
+}
 
-fn left(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
-fn right(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
+fn retract_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_CLOSE_STOP).unwrap();
+}
+
+fn expand(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_OPEN).unwrap();
+}
+
+fn expand_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_OPEN_STOP).unwrap();
+}
+
+fn left(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_LEFT).unwrap();
+}
+
+fn left_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_LEFT_STOP).unwrap();
+}
+
+fn right(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_RIGHT).unwrap();
+}
+
+fn right_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+    let mut comms = COMMS.lock().unwrap();
+    comms.cmd(commands::CRADLE_RIGHT_STOP).unwrap();
+}
 
 fn up(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
-
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_UP).unwrap();
-    
 }
 
 fn up_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
-
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_UP_STOP).unwrap();
-    
 }
 
 fn down(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
-
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_DOWN).unwrap();
-    
 }
 
 fn down_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
-
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_DOWN_STOP).unwrap();
-    
 }
 
 fn scan(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {
@@ -107,14 +133,14 @@ pub fn build_controls() -> impl Widget<AppState> {
                         Flex::column()
                             .with_flex_child(
                                 Button::from_label(Label::new("→←").with_font(BUTTON_FONT))
-                                    .on_click(retract)
+                                    .controller(ButtonState::new(retract, retract_stop))
                                     .expand(),
                                 1.,
                             )
                             .with_spacer(SIZE_S)
                             .with_flex_child(
                                 Button::from_label(Label::new("←→").with_font(BUTTON_FONT))
-                                    .on_click(expand)
+                                    .controller(ButtonState::new(expand, expand_stop))
                                     .expand(),
                                 1.,
                             ),
@@ -125,7 +151,7 @@ pub fn build_controls() -> impl Widget<AppState> {
                         Flex::row()
                             .with_flex_child(
                                 Button::from_label(Label::new("←").with_font(BUTTON_FONT))
-                                    .on_click(left)
+                                    .controller(ButtonState::new(left, left_stop))
                                     .expand(),
                                 FlexParams::new(1., CrossAxisAlignment::End),
                             )
@@ -150,7 +176,7 @@ pub fn build_controls() -> impl Widget<AppState> {
                             .with_spacer(SIZE_S)
                             .with_flex_child(
                                 Button::from_label(Label::new("→").with_font(BUTTON_FONT))
-                                    .on_click(right)
+                                    .controller(ButtonState::new(right, right_stop))
                                     .expand(),
                                 FlexParams::new(1., CrossAxisAlignment::End),
                             ),
@@ -172,7 +198,6 @@ pub fn build_controls() -> impl Widget<AppState> {
 }
 
 fn ping(_data: &mut AppState) {
-
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::PING).unwrap();
 

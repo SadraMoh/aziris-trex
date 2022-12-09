@@ -1,7 +1,5 @@
-use std::{thread, time::Duration};
-
 use druid::{
-    widget::{Button, Either, Flex, Label, ProgressBar},
+    widget::{Button, Either, Flex, Label, Spinner},
     Env, EventCtx, Widget, WidgetExt,
 };
 
@@ -12,7 +10,10 @@ use crate::{
     AppState,
 };
 
-fn auto_adjust(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {}
+fn auto_adjust(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
+    data.is_auto_adjusting = true;    
+}
+
 fn calibrate(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
 
@@ -36,6 +37,12 @@ pub fn build_actions() -> impl Widget<AppState> {
             .must_fill_main_axis(true)
             .with_child(Button::new("Automatic adjustment").on_click(auto_adjust))
             .with_spacer(SIZE_S)
+            .with_child(Either::new(
+                |data: &AppState, _: &Env| data.is_auto_adjusting,
+                Spinner::new(),
+                Label::new(""),
+            ))
+            .with_spacer(SIZE_S)
             .with_child(
                 Button::from_label(Label::new(|is_calibrating: &bool, _: &Env| {
                     if *is_calibrating {
@@ -50,7 +57,7 @@ pub fn build_actions() -> impl Widget<AppState> {
             .with_spacer(SIZE_S)
             .with_child(Either::new(
                 |data: &AppState, _: &Env| data.is_calibrating,
-                ProgressBar::new().lens(AppState::counter),
+                Spinner::new(),
                 Label::new(""),
             ))
             .expand_width(),

@@ -2,13 +2,13 @@ use druid::{Data};
 
 #[derive(Clone, Debug, Data, PartialEq)]
 pub enum ScanMode {
-    Pedal,
+    Auto, 
     Panel,
-    Auto,
+    Pedal,
 }
 
 impl Default for ScanMode {
     fn default() -> Self {
-        ScanMode::Pedal
+        ScanMode::Auto
     }
 }

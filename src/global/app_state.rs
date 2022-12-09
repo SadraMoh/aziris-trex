@@ -15,4 +15,5 @@ pub struct AppState {
     pub light_mix: f64,
 
     pub is_calibrating: bool,
+    pub is_auto_adjusting: bool,
 }
