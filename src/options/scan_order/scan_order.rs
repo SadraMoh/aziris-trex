@@ -1,4 +1,3 @@
-use std::default;
 
 use druid::Data;
 
@@ -14,6 +13,6 @@ pub enum ScanOrder {
 
 impl Default for ScanOrder {
     fn default() -> Self {
-        ScanOrder::Right
+        ScanOrder::InApp2
     }
 }

@@ -1,4 +1,4 @@
-use crate::{AppState, vars::SIZE_M, comms::COMMS};
+use crate::{AppState, vars::SIZE_M};
 
 use druid::{
     widget::{Either, Flex, Label},
@@ -25,7 +25,7 @@ pub fn build_connection_status() -> impl Widget<AppState> {
         .with_flex_child(
             Label::new(|connected_to: &Option<String>, _env: &Env| {
                 if let Some(port_name) = connected_to {
-                    format!("Connected To {}", port_name)
+                    format!("Connected to T-REX on {}", port_name)
                 } else {
                     "Disconnected".to_string()
                 }

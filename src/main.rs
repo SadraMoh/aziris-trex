@@ -1,23 +1,23 @@
 #![windows_subsystem = "windows"]
 
 use druid::widget::{CrossAxisAlignment, Flex, FlexParams, Padding};
-use druid::{AppLauncher, Env, EventCtx, PlatformError, Widget, WindowDesc};
-use enigo::{Enigo, KeyboardControllable, MouseControllable};
+use druid::{AppLauncher, PlatformError, Widget, WindowDesc};
 use trex_ui::actions::build_actions;
 use trex_ui::comms::{commands, Channel, COMMS};
 use trex_ui::connection_status::build_connection_status;
 use trex_ui::controls::{build_controls, send_key};
 use trex_ui::lights::build_lights;
 use trex_ui::logs::build_logs;
-use trex_ui::options::{build_options, ScanOrder};
+use trex_ui::options::{build_options};
 use trex_ui::vars::{SIZE_L, SIZE_XXL};
 use trex_ui::AppState;
-
+ 
 fn main() -> Result<(), PlatformError> {
+
     let main_window = WindowDesc::new(ui_builder())
         .title("T-Rex Control Panel")
-        .window_size((950., 900.))
-        .with_min_size((640., 540.));
+        .window_size((950., 824.))
+        .with_min_size((740., 500.));
 
     let mut data = AppState::default();
     data.counter = 0.5;
@@ -44,8 +44,19 @@ fn main() -> Result<(), PlatformError> {
                 commands::PEDAL_SCAN => {
                     send_key(data);
                 },
+                commands::CALIBRATION_START => {
+                    data.is_calibrating = true;
+                }
                 commands::CALIBRATION_PREVENTED | commands::CALIBRATION_STOP | commands::CALIBRATION_TIMEOUT => {
                     data.is_calibrating = false;
+                },
+                commands::CALIBRATION_IMMINENT => {
+                },
+                commands:: ADJUST_START => {
+                    data.is_auto_adjusting = true;
+                }
+                commands::ADJUST_STOP => {
+                    data.is_auto_adjusting = false;
                 }
                 _ => (),
             }
@@ -91,28 +102,4 @@ fn ui_builder() -> impl Widget<AppState> {
     );
 
     template
-}
-
-fn autogui_hello_world(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
-    let mut enigo = Enigo::new();
-    enigo.mouse_move_to(600, 200);
-    enigo.mouse_click(enigo::MouseButton::Left);
-    enigo.key_sequence_parse("hello world");
-}
-
-fn count_up(_ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
-    data.counter += 1.;
-    data.scan_order = match data.scan_order {
-        ScanOrder::Left => ScanOrder::Right,
-        ScanOrder::Right => ScanOrder::RightThenLeft,
-        ScanOrder::RightThenLeft => ScanOrder::LeftThenRight,
-        ScanOrder::LeftThenRight => ScanOrder::InApp,
-        ScanOrder::InApp => ScanOrder::InApp2,
-        ScanOrder::InApp2 => ScanOrder::Left,
-    };
-
-    let mut c = data.logs.clone();
-    c.push_str("Hello ");
-
-    data.logs.push_str(&c);
 }

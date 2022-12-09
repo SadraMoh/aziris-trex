@@ -36,5 +36,9 @@ pub const CRADLE_RIGHT_STOP: &[u8] = b"cradle_right_stop";
 
 pub const CALIBRATION_START: &[u8] = b"calibration_start";
 pub const CALIBRATION_STOP: &[u8] = b"calibration_stop";
+pub const CALIBRATION_IMMINENT: &[u8] = b"calibration_imminent";
 pub const CALIBRATION_TIMEOUT: &[u8] = b"calibration_timeout";
 pub const CALIBRATION_PREVENTED: &[u8] = b"calibration_prevented";
+
+pub const ADJUST_START: &[u8] = b"adjust_start";
+pub const ADJUST_STOP: &[u8] = b"adjust_stop";

@@ -1,5 +1,3 @@
-use std::default;
-
 use druid::Data;
 
 #[derive(Clone, Debug, Data, PartialEq)]

@@ -15,7 +15,7 @@ pub fn build_scan_mode() -> impl Widget<AppState> {
     let radio_group = Flex::column()
         .cross_axis_alignment(CrossAxisAlignment::Start)
         .must_fill_main_axis(true)
-        .with_child(Label::new("Scan order"))
+        .with_child(Label::new("Scan mode"))
         .with_spacer(SIZE_S)
         .with_child(
             RadioGroup::column(SCAN_MODE_OPTIONS.to_vec())

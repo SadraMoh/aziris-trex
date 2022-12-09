@@ -14,7 +14,7 @@ impl<T, W: Widget<T>> Controller<T, W> for ValueChanged<T> {
     
     fn update(
         &mut self,
-        child: &mut W,
+        _child: &mut W,
         ctx: &mut druid::UpdateCtx,
         old_data: &T,
         data: &T,

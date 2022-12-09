@@ -1,79 +1,88 @@
-use std::{
-    thread::{self, Thread},
-    time::Duration,
-};
+use std::{thread, time::Duration};
 
 use druid::{
     widget::{Button, CrossAxisAlignment, Flex, FlexParams, Label},
-    Env, EventCtx, FontDescriptor, FontFamily, KeyOrValue, Widget, WidgetExt,
+    Env, Event, EventCtx, FontDescriptor, FontFamily, KeyEvent, KeyOrValue, Widget, WidgetExt, LifeCycleCtx,
 };
 use enigo::{Enigo, KeyboardControllable, MouseControllable};
 
 use crate::{
     atomic::group,
-    comms::{commands, Channel, COMMS},
-    custom_controllers::ButtonState,
+    comms::{commands, COMMS},
+    custom_controllers::{ButtonState, KeyLogger},
     options::{ScanMode, ScanOrder},
     vars::{SIZE_L, SIZE_S, SIZE_XL},
     AppState,
 };
 
-fn retract(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+// #region METHODS
+
+fn retract(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_CLOSE).unwrap();
 }
 
-fn retract_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn retract_stop(
+    _ctx: &mut druid::EventCtx,
+    _event: &druid::Event,
+    _data: &mut AppState,
+    _env: &Env,
+) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_CLOSE_STOP).unwrap();
 }
 
-fn expand(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn expand(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_OPEN).unwrap();
 }
 
-fn expand_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn expand_stop(
+    _ctx: &mut druid::EventCtx,
+    _event: &druid::Event,
+    _data: &mut AppState,
+    _env: &Env,
+) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_OPEN_STOP).unwrap();
 }
 
-fn left(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn left(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_LEFT).unwrap();
 }
 
-fn left_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn left_stop(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_LEFT_STOP).unwrap();
 }
 
-fn right(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn right(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_RIGHT).unwrap();
 }
 
-fn right_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn right_stop(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_RIGHT_STOP).unwrap();
 }
 
-fn up(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn up(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_UP).unwrap();
 }
 
-fn up_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn up_stop(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_UP_STOP).unwrap();
 }
 
-fn down(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn down(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_DOWN).unwrap();
 }
 
-fn down_stop(ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut AppState, env: &Env) {
+fn down_stop(_ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut AppState, _env: &Env) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::CRADLE_DOWN_STOP).unwrap();
 }
@@ -84,6 +93,8 @@ fn scan(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {
 
     send_key(_data);
 }
+
+// #endregion METHODS
 
 const SCAN_DELAY: u64 = 500;
 const RIGHT_KEY: enigo::Key = enigo::Key::F9;
@@ -197,7 +208,7 @@ pub fn build_controls() -> impl Widget<AppState> {
     template
 }
 
-fn ping(_data: &mut AppState) {
+fn _ping(_data: &mut AppState) {
     let mut comms = COMMS.lock().unwrap();
     comms.cmd(commands::PING).unwrap();
 

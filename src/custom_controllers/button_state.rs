@@ -19,7 +19,7 @@ impl<T> ButtonState<T> {
 }
 
 impl<T, W: Widget<T>> Controller<T, W> for ButtonState<T> {
-    fn event(&mut self, _child: &mut W, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut T, env: &Env) {
+    fn event(&mut self, child: &mut W, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut T, env: &Env) {
         match event {
             druid::Event::MouseDown(_) => {
                 (self.mousedown_fn)(ctx, event, data, env);
@@ -29,5 +29,7 @@ impl<T, W: Widget<T>> Controller<T, W> for ButtonState<T> {
             },
             _ => (),
         }
+
+        child.event(ctx, event, data, env)
     }
 }
