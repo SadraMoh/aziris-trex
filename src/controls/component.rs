@@ -2,7 +2,8 @@ use std::{thread, time::Duration};
 
 use druid::{
     widget::{Button, CrossAxisAlignment, Flex, FlexParams, Label},
-    Env, Event, EventCtx, FontDescriptor, FontFamily, KeyEvent, KeyOrValue, Widget, WidgetExt, LifeCycleCtx,
+    Env, Event, EventCtx, FontDescriptor, FontFamily, KeyEvent, KeyOrValue, LifeCycleCtx, Widget,
+    WidgetExt, Key,
 };
 use enigo::{Enigo, KeyboardControllable, MouseControllable};
 
@@ -11,7 +12,7 @@ use crate::{
     comms::{commands, COMMS},
     custom_controllers::{ButtonState, KeyLogger},
     options::{ScanMode, ScanOrder},
-    vars::{SIZE_L, SIZE_S, SIZE_XL},
+    vars::{ROOT_ID, SIZE_L, SIZE_S, SIZE_XL},
     AppState,
 };
 
@@ -145,6 +146,10 @@ pub fn build_controls() -> impl Widget<AppState> {
                             .with_flex_child(
                                 Button::from_label(Label::new("→←").with_font(BUTTON_FONT))
                                     .controller(ButtonState::new(retract, retract_stop))
+                                    .controller(KeyLogger::new(
+                                        |_, _, _, _, _| {},
+                                        |_, _, _, _, _| {},
+                                    ))
                                     .expand(),
                                 1.,
                             )
@@ -203,7 +208,28 @@ pub fn build_controls() -> impl Widget<AppState> {
                     .fix_height(BUTTON_SIZE)
                     .disabled_if(|data: &AppState, _: &Env| data.scan_mode != ScanMode::Panel),
             ),
-    );
+    )
+    .with_id(*ROOT_ID)
+    .controller(KeyLogger::new(
+        |key: &KeyEvent, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env: &Env| match key.code {
+            druid::Code::ArrowDown | druid::Code::KeyD => down(ctx, event, data, env),
+            druid::Code::ArrowLeft | druid::Code::KeyL => left(ctx, event, data, env),
+            druid::Code::ArrowRight | druid::Code::KeyR => right(ctx, event, data, env),
+            druid::Code::ArrowUp | druid::Code::KeyU => up(ctx, event, data, env),
+            druid::Code::KeyC | druid::Code::NumpadSubtract | druid::Code::Minus => retract(ctx, event, data, env),
+            druid::Code::KeyO | druid::Code::NumpadAdd | druid::Code::Equal => expand(ctx, event, data, env),
+            _ => ()
+        },
+        |key: &KeyEvent, ctx: &mut EventCtx, event: &Event, data: &mut AppState, env: &Env| match key.code {
+            druid::Code::ArrowDown | druid::Code::KeyD => down_stop(ctx, event, data, env),
+            druid::Code::ArrowLeft | druid::Code::KeyL => left_stop(ctx, event, data, env),
+            druid::Code::ArrowRight | druid::Code::KeyR => right_stop(ctx, event, data, env),
+            druid::Code::ArrowUp | druid::Code::KeyU => up_stop(ctx, event, data, env),
+            druid::Code::KeyC | druid::Code::NumpadSubtract | druid::Code::Minus => retract_stop(ctx, event, data, env),
+            druid::Code::KeyO | druid::Code::NumpadAdd | druid::Code::Equal => expand_stop(ctx, event, data, env),
+            _ => ()
+        },
+    ));
 
     template
 }

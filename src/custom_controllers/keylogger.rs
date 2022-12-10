@@ -2,6 +2,8 @@ use druid::KeyEvent;
 use druid::widget::prelude::*;
 use druid::widget::Controller;
 
+use crate::vars::ROOT_ID;
+
 pub struct KeyLogger<T> {
     keydown_fn: Box<dyn Fn(&KeyEvent, &mut EventCtx, &Event, &mut T, &Env)>,
     keyup_fn: Box<dyn Fn(&KeyEvent, &mut EventCtx, &Event, &mut T, &Env)>,
@@ -29,7 +31,7 @@ impl<T, W: Widget<T>> Controller<T, W> for KeyLogger<T> {
         env: &Env,
     ) {
         
-        println!("{:?}", event);
+        ctx.set_focus(*ROOT_ID);
         
         match event {
             Event::KeyDown(key) => (self.keydown_fn)(key, ctx, event, data, env),
