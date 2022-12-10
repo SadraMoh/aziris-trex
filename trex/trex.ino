@@ -109,7 +109,7 @@ const unsigned short MASTER_POWER = 39;
 #define LED_LEVEL_LOW 85
 #define LED_LEVEL_MID 170
 #define LED_LEVEL_MAX 255
-#define LED_LEVEL_DEFAULT 24
+#define LED_LEVEL_DEFAULT 12
 unsigned short WhiteLedLevel = LED_LEVEL_MAX;
 unsigned short YellowLedLevel = LED_LEVEL_MAX;
 
@@ -128,21 +128,20 @@ unsigned short ScanMode = MODE_AUTO;
 #pragma region METHODS
 
 void handle_glass_up_sensor(struct StateButton *sensor) {
+  if (digitalRead(GLASS_UP_SENSOR) == LOW)
+    digitalWrite(GLASS_UP_MOTOR, HIGH);  // stop
 
   if (sensor->counter % 2 == 0) {
     // RELEASED
 
   } else {
     // PUSHED
-
-    if (ScanMode == MODE_PANEL || ScanMode == MODE_AUTO) {
-    }
-
-    digitalWrite(GLASS_UP_MOTOR, HIGH);  // stop
   }
 }
 
 void handle_glass_down_sensor(struct StateButton *sensor) {
+  if (digitalRead(GLASS_DOWN_SENSOR) == LOW)
+    digitalWrite(GLASS_DOWN_MOTOR, HIGH);  // stop
 
   if (sensor->counter % 2 == 0) {
     // RELEASED
@@ -440,19 +439,52 @@ String adjust_start(String msg) {
 
   Serial.println(CMD_ADJUST_START);
 
-  while (spin_cradle_down() == true) {}
+  while (spin_cradle_down() == true) {
+    String cmd = check_for_cmd();
+
+    if (cmd == CMD_ADJUST_STOP || cmd == CMD_ADJUST_START) {
+      digitalWrite(CRADLE_DOWN_MOTOR, LOW);  // stop
+      return CMD_ADJUST_STOP;
+    }
+  }
   digitalWrite(CRADLE_DOWN_MOTOR, LOW);  // stop
 
-  while (spin_glass_down() == true) {}
+  while (spin_glass_down() == true) {
+    String cmd = check_for_cmd();
+
+    if (cmd == CMD_ADJUST_STOP || cmd == CMD_ADJUST_START) {
+      digitalWrite(GLASS_DOWN_MOTOR, HIGH);  // stop
+      spin_glass_up();
+      return CMD_ADJUST_STOP;
+    }
+  }
   digitalWrite(GLASS_DOWN_MOTOR, HIGH);  // stop
 
   spin_cradle_up();
-  while (digitalRead(CRADLE_UP_SENSOR) == HIGH && digitalRead(GLASS_AUTOLEVEL_SENSOR) == HIGH) {};
+  while (digitalRead(CRADLE_UP_SENSOR) == HIGH && digitalRead(GLASS_AUTOLEVEL_SENSOR) == HIGH) {
+    String cmd = check_for_cmd();
+
+    if (cmd == CMD_ADJUST_STOP || cmd == CMD_ADJUST_START) {
+      digitalWrite(CRADLE_UP_MOTOR, LOW);  // stop
+      return CMD_ADJUST_STOP;
+    }
+  };
   analogWrite(CRADLE_UP_MOTOR, LOW);
 
-  while (spin_glass_up() == true)
-    ;
-  digitalWrite(GLASS_DOWN_MOTOR, HIGH);  // stop
+  // keep glass down on pedal
+  if(ScanMode == MODE_PEDAL)
+    return CMD_ADJUST_STOP;
+
+  spin_glass_up();
+  while (digitalRead(GLASS_UP_SENSOR) == HIGH) {
+    String cmd = check_for_cmd();
+
+    if (cmd == CMD_ADJUST_STOP || cmd == CMD_ADJUST_START) {
+      digitalWrite(GLASS_UP_MOTOR, HIGH);  // stop
+      return CMD_ADJUST_STOP;
+    }
+  }
+  digitalWrite(GLASS_UP_MOTOR, HIGH);  // stop
 
   return CMD_ADJUST_STOP;
 }
@@ -527,6 +559,11 @@ String calibration_start(String msg) {
 
 String calibration_stop(String msg) {
   // start
+
+  digitalWrite(LASER, HIGH);
+
+  analogWrite(LED_WHITE, LED_LEVEL_DEFAULT);
+  analogWrite(LED_YELLOW, LED_LEVEL_DEFAULT);
 
   IsCalibrating = false;
   if (ScanMode == MODE_AUTO || ScanMode == MODE_PANEL)
@@ -756,9 +793,9 @@ void setup() {
     btn.reading = reading;
     btn.last_reading = reading;
 
-    Serial.print(btn.PIN);
-    Serial.print(" - ");
-    Serial.println(reading);
+    // Serial.print(btn.PIN);
+    // Serial.print(" - ");
+    // Serial.println(reading);
   }
 }
 
