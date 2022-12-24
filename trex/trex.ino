@@ -113,7 +113,7 @@ const unsigned short MASTER_POWER = 39;
 unsigned short WhiteLedLevel = LED_LEVEL_MAX;
 unsigned short YellowLedLevel = LED_LEVEL_MAX;
 
-unsigned long CALIBRATION_DURATION = 1000U * 60U * 1U;
+unsigned long CALIBRATION_DURATION = 1000U * 60U * 3U;
 bool IsCalibrating = false;
 
 bool IsAdjusting = false;
@@ -136,6 +136,10 @@ void handle_glass_up_sensor(struct StateButton *sensor) {
 
   } else {
     // PUSHED
+    digitalWrite(LASER, HIGH);
+
+    analogWrite(LED_WHITE, LED_LEVEL_DEFAULT);
+    analogWrite(LED_YELLOW, LED_LEVEL_DEFAULT);
   }
 }
 
@@ -146,7 +150,7 @@ void handle_glass_down_sensor(struct StateButton *sensor) {
   if (sensor->counter % 2 == 0) {
     // RELEASED
 
-    if (ScanMode == MODE_PANEL || ScanMode == MODE_AUTO) {
+    if (ScanMode == MODE_AUTO) {
       digitalWrite(LASER, HIGH);
 
       analogWrite(LED_WHITE, LED_LEVEL_DEFAULT);
@@ -166,8 +170,8 @@ void handle_glass_down_sensor(struct StateButton *sensor) {
     digitalWrite(GLASS_DOWN_MOTOR, HIGH);  // stop
 
     if (ScanMode == MODE_AUTO && IsCalibrating == false && IsAdjusting == false) {
-      Serial.println(CMD_PEDAL_SCAN);
-      delay(1700);
+      Serial.print(CMD_PEDAL_SCAN);
+      delay(1800);    
     }
   }
 }
@@ -178,7 +182,7 @@ void handle_left_open_sensor(struct StateButton *sensor) {
 
   analogWrite(CRADLE_LEFT_OPEN_MOTOR, LOW);    // stop
   analogWrite(CRADLE_RIGHT_CLOSE_MOTOR, LOW);  // stop
-  Serial.print(CMD_CRADLE_STALLED);
+  // Serial.print(CMD_CRADLE_STALLED);
 }
 
 void handle_left_close_sensor(struct StateButton *sensor) {
@@ -187,7 +191,7 @@ void handle_left_close_sensor(struct StateButton *sensor) {
 
   analogWrite(CRADLE_LEFT_CLOSE_MOTOR, LOW);  // stop
   analogWrite(CRADLE_RIGHT_OPEN_MOTOR, LOW);  // stop
-  Serial.print(CMD_CRADLE_STALLED);
+  // Serial.print(CMD_CRADLE_STALLED);
 }
 
 void handle_right_open_sensor(struct StateButton *sensor) {
@@ -196,7 +200,7 @@ void handle_right_open_sensor(struct StateButton *sensor) {
 
   analogWrite(CRADLE_RIGHT_OPEN_MOTOR, LOW);  // stop
   analogWrite(CRADLE_LEFT_CLOSE_MOTOR, LOW);  // stop
-  Serial.print(CMD_CRADLE_STALLED);
+  // Serial.print(CMD_CRADLE_STALLED);
 }
 
 void handle_right_close_sensor(struct StateButton *sensor) {
@@ -205,7 +209,7 @@ void handle_right_close_sensor(struct StateButton *sensor) {
 
   analogWrite(CRADLE_RIGHT_CLOSE_MOTOR, LOW);  // stop
   analogWrite(CRADLE_LEFT_OPEN_MOTOR, LOW);    // stop
-  Serial.print(CMD_CRADLE_STALLED);
+  // Serial.print(CMD_CRADLE_STALLED);
 }
 
 void handle_cradle_up_sensor(struct StateButton *sensor) {
@@ -213,7 +217,7 @@ void handle_cradle_up_sensor(struct StateButton *sensor) {
     return;
 
   digitalWrite(CRADLE_UP_MOTOR, LOW);  // stop
-  Serial.print(CMD_CRADLE_STALLED);
+  // Serial.print(CMD_CRADLE_STALLED);
 }
 
 void handle_cradle_down_sensor(struct StateButton *sensor) {
@@ -221,7 +225,7 @@ void handle_cradle_down_sensor(struct StateButton *sensor) {
     return;
 
   digitalWrite(CRADLE_DOWN_MOTOR, LOW);  // stop
-  Serial.print(CMD_CRADLE_STALLED);
+  // Serial.print(CMD_CRADLE_STALLED);
 }
 
 /// Handle pedal
@@ -437,7 +441,7 @@ String mix_leds(String msg) {
 /// Start the automatic adjustment process
 String adjust_start(String msg) {
 
-  Serial.println(CMD_ADJUST_START);
+  Serial.print(CMD_ADJUST_START);
 
   while (spin_cradle_down() == true) {
     String cmd = check_for_cmd();
@@ -472,7 +476,7 @@ String adjust_start(String msg) {
   analogWrite(CRADLE_UP_MOTOR, LOW);
 
   // keep glass down on pedal
-  if(ScanMode == MODE_PEDAL)
+  if (ScanMode == MODE_PEDAL)
     return CMD_ADJUST_STOP;
 
   spin_glass_up();

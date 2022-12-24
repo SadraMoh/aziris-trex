@@ -18,6 +18,9 @@ pub struct AppState {
     pub is_auto_adjusting: bool,
 
     pub is_log_shown: bool,
+
+    pub is_options_shown: bool,
+    pub is_kelvin_shown: bool,
 }
 
 impl Default for AppState {
@@ -32,6 +35,8 @@ impl Default for AppState {
             is_calibrating: false,
             is_auto_adjusting: false,
             is_log_shown: false,
+            is_options_shown: false,
+            is_kelvin_shown: false,
         }
     }
 }

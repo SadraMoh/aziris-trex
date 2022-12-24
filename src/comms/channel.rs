@@ -1,5 +1,6 @@
 use druid::image::EncodableLayout;
 use once_cell::sync::Lazy;
+use serialport::SerialPortType::UsbPort;
 use serialport::*;
 use std::{sync::Mutex, thread, time::Duration};
 
@@ -23,10 +24,28 @@ impl Channel {
     pub fn init() -> Result<Self> {
         let ports = available_ports()?;
 
-        let port: &SerialPortInfo = ports.first().ok_or(Error {
+        let found_port = ports.iter().find(|port| {
+            let UsbPort(usb_port) = &port.port_type else {
+                return false;
+            };
+
+            let Some(product) = &usb_port.product else {
+                return false;
+            };
+
+            if product.contains("CH340") || product.to_lowercase().contains("arduino") {
+                return true;
+            }
+
+            return false;
+        });
+
+        let first = ports.first().ok_or(Error {
             description: "Avalibe ports list is empty".to_string(),
             kind: ErrorKind::NoDevice,
         })?;
+        
+        let port: &SerialPortInfo = found_port.unwrap_or(first);
 
         let builder = serialport::new(port.port_name.clone(), CHANNEL_BAUDRATE)
             .flow_control(FlowControl::Software)
@@ -78,7 +97,7 @@ impl Channel {
             callback(text.to_string());
         });
     }
-    
+
     // pub fn read(&mut self) -> Result<[u8; 32]> {
     //     let mut read_buf = [0; 32];
     //     let _size = self.serial.read(&mut read_buf)?;
@@ -98,6 +117,4 @@ impl Channel {
     //         Ok(String::from("!"))
     //     }
     // }
-
-    
 }

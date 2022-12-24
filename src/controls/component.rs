@@ -2,8 +2,8 @@ use std::{thread, time::Duration};
 
 use druid::{
     widget::{Button, CrossAxisAlignment, Flex, FlexParams, Label},
-    Env, Event, EventCtx, FontDescriptor, FontFamily, KeyEvent, KeyOrValue, LifeCycleCtx, Widget,
-    WidgetExt, Key,
+    Env, Event, EventCtx, FontDescriptor, FontFamily, KeyEvent, KeyOrValue, Widget,
+    WidgetExt, 
 };
 use enigo::{Enigo, KeyboardControllable, MouseControllable};
 
@@ -100,7 +100,7 @@ fn scan(_ctx: &mut EventCtx, _data: &mut AppState, _env: &Env) {
 const SCAN_DELAY: u64 = 500;
 const RIGHT_KEY: enigo::Key = enigo::Key::F9;
 const LEFT_KEY: enigo::Key = enigo::Key::F8;
-const INAPP_KEY: enigo::Key = enigo::Key::F10;
+const INAPP_KEY: enigo::Key = enigo::Key::Space;
 const INAPP2_KEY: enigo::Key = enigo::Key::F7;
 pub fn send_key(data: &mut AppState) {
     let mut enigo = Enigo::new();

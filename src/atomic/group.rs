@@ -23,3 +23,4 @@ pub fn group(title: &str, child: impl Widget<AppState> + 'static) -> impl Widget
 
     template
 }
+

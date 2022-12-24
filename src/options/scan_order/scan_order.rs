@@ -13,6 +13,6 @@ pub enum ScanOrder {
 
 impl Default for ScanOrder {
     fn default() -> Self {
-        ScanOrder::InApp2
+        ScanOrder::InApp
     }
 }

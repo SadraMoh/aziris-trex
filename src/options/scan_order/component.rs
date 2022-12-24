@@ -7,8 +7,8 @@ use crate::{options::ScanOrder, vars::SIZE_S, AppState};
 
 pub fn build_scan_order() -> impl Widget<AppState> {
     const SCAN_ORDER_OPTIONS: [(&str, ScanOrder); 6] = [
-        ("InApp2", ScanOrder::InApp2),
         ("InApp", ScanOrder::InApp),
+        ("InApp2", ScanOrder::InApp2),
         ("RightThenLeft", ScanOrder::RightThenLeft),
         ("LeftThenRight", ScanOrder::LeftThenRight),
         ("Left", ScanOrder::Left),

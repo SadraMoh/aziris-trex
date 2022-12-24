@@ -1,14 +1,16 @@
 #![windows_subsystem = "windows"]
 
+#![allow(deprecated)]
+#![allow(unused)]
+
 use druid::widget::{
-    Checkbox, CrossAxisAlignment, Either, Flex, FlexParams, Label, Padding, Switch,
+    Checkbox, CrossAxisAlignment, Either, Flex, FlexParams, 
 };
-use druid::{AppLauncher, Env, LifeCycleCtx, PlatformError, Widget, WidgetExt, WindowDesc};
+use druid::{AppLauncher, PlatformError, Widget, WidgetExt, WindowDesc};
 use trex_ui::actions::build_actions;
 use trex_ui::comms::{commands, Channel, COMMS};
 use trex_ui::connection_status::build_connection_status;
 use trex_ui::controls::{build_controls, send_key};
-use trex_ui::custom_controllers::{KeyLogger, ValueChanged};
 use trex_ui::lights::build_lights;
 use trex_ui::logs::build_logs;
 use trex_ui::options::build_options;
@@ -16,8 +18,9 @@ use trex_ui::vars::{SIZE_L, SIZE_XXL};
 use trex_ui::AppState;
 
 fn main() -> Result<(), PlatformError> {
+    
     let main_window = WindowDesc::new(ui_builder())
-        .title("T-Rex Control Panel")
+        .title("T-Rex® Control Panel")
         .window_size((750., 824.))
         .with_min_size((750., 500.));
 

@@ -1,9 +1,14 @@
 use druid::{
     widget::{Controller, Flex, Label, Slider},
-    Color, Env, KeyOrValue, Widget, WidgetExt, UpdateCtx,
+    Color, Env, KeyOrValue, UpdateCtx, Widget, WidgetExt,
 };
 
-use crate::{atomic::group, vars::SIZE_S, AppState, comms::{COMMS, commands}};
+use crate::{
+    atomic::{folder, group},
+    comms::{commands, COMMS},
+    vars::SIZE_S,
+    AppState,
+};
 
 struct ValueChanged<T> {
     update_fn: Box<dyn Fn(&mut UpdateCtx, &T, &T, &Env)>,
@@ -11,12 +16,13 @@ struct ValueChanged<T> {
 
 impl<T> ValueChanged<T> {
     fn new(f: impl Fn(&mut UpdateCtx, &T, &T, &Env) + 'static) -> Self {
-        ValueChanged { update_fn: Box::new(f) }
+        ValueChanged {
+            update_fn: Box::new(f),
+        }
     }
 }
 
 impl<T, W: Widget<T>> Controller<T, W> for ValueChanged<T> {
-    
     fn update(
         &mut self,
         _child: &mut W,
@@ -25,12 +31,9 @@ impl<T, W: Widget<T>> Controller<T, W> for ValueChanged<T> {
         data: &T,
         env: &Env,
     ) {
-
         (self.update_fn)(ctx, old_data, data, env);
-
     }
 }
-
 
 pub fn build_lights() -> impl Widget<AppState> {
     // const SCAN_MODE_OPTIONS: [(&str, LightMix); 7] = [
@@ -62,26 +65,25 @@ pub fn build_lights() -> impl Widget<AppState> {
         .axis(druid::widget::Axis::Horizontal)
         .with_step(1.)
         .expand_width()
-        .controller(ValueChanged::new(|_,_, data,_| {
+        .controller(ValueChanged::new(|_, _, data, _| {
             let cmd: &[u8] = match *data as i64 {
-                3 =>  commands::LED_MIX_SCORCHING,
-                2 =>  commands::LED_MIX_HOT,
-                1 =>  commands::LED_MIX_WARM,
-                0 =>  commands::LED_MIX_AUTO,
-                -1 =>  commands::LED_MIX_COOL,
-                -2 =>  commands::LED_MIX_COLD,
-                -3 =>  commands::LED_MIX_FREEZING,
-                _ => commands::LED_MIX_AUTO
+                3 => commands::LED_MIX_SCORCHING,
+                2 => commands::LED_MIX_HOT,
+                1 => commands::LED_MIX_WARM,
+                0 => commands::LED_MIX_AUTO,
+                -1 => commands::LED_MIX_COOL,
+                -2 => commands::LED_MIX_COLD,
+                -3 => commands::LED_MIX_FREEZING,
+                _ => commands::LED_MIX_AUTO,
             };
 
             let mut comms = COMMS.lock().unwrap();
             comms.cmd(cmd).unwrap();
-
         }))
         .lens(AppState::light_mix);
 
-    let template = group(
-        "Lights",
+    let template = folder(
+        "Vario-Kelvin® LED adjustment",
         Flex::row()
             .must_fill_main_axis(true)
             .with_child(
@@ -93,6 +95,9 @@ pub fn build_lights() -> impl Widget<AppState> {
             )
             .with_spacer(SIZE_S)
             .with_flex_child(slider, 1.),
+        |data: &AppState, _: _| data.is_kelvin_shown,
+        |_: _, data, _: _| data.is_kelvin_shown = !data.is_kelvin_shown,
+        |_: _, data, _: _| data.is_kelvin_shown = !data.is_kelvin_shown,
     );
 
     template
